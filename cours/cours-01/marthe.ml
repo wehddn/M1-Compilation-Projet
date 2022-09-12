@@ -85,22 +85,22 @@ let loop read eval print =
    Voici des exemples de programmes Marthe pour illustrent ces idées:
 
    * Exemple 1:
-   On veut traduire "1 + 2" en "EAdd (EInt 1, EInt 2)".
+   On veut traduire "1 + 2" en "EPlus (EInt 1, EInt 2)".
    La sous-chaîne "1" a été reconnue comme "EInt 1".
    La sous-chaîne "2" a été reconnue comme "EInt 2".
    La sous-chaîne "1 + 2" a été reconnue en "EPlus (EInt 1, EInt 2)".
 
    * Exemple 2:
-   On veut traduire "1 +    2   * 3" en "EAdd (EInt 1, EMul (EInt 2, EInt 3))".
+   On veut traduire "1 +    2   * 3" en "EPlus (EInt 1, EMul (EInt 2, EInt 3))".
    Le nombre d'espaces n'a pas de signification dans la grammaire du langage
    Marthe. Il y a donc des caractères importants et des caractères à ignorer.
    Nous allons voir que la phase d'analyse lexicale sert à se concentrer sur
    les symboles importants.
 
    * Exemple 3:
-   On veut transformer "1 + 2 * 3" en "EAdd (EInt 1, EMul (EInt 2, EInt 3))".
+   On veut transformer "1 + 2 * 3" en "EPlus (EInt 1, EMul (EInt 2, EInt 3))".
    Attention, ici, il serait incorrect de traduire "1 + 2 * 3" en
-   "EMul (EAdd (EInt 1, EInt 2), EInt 3)" parce que l'on donnerait
+   "EMul (EPlus (EInt 1, EInt 2), EInt 3)" parce que l'on donnerait
    alors la priorité à l'addition devant la multiplication !
 
    Ces exemples nous apprennent plusieurs choses:
