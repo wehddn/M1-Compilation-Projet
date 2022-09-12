@@ -101,7 +101,7 @@ let loop read eval print =
    On veut transformer "1 + 2 * 3" en "EAdd (EInt 1, EMul (EInt 2, EInt 3))".
    Attention, ici, il serait incorrect de traduire "1 + 2 * 3" en
    "EMul (EAdd (EInt 1, EInt 2), EInt 3)" parce que l'on donnerait
-   alors la priorité à l'addition devant la multiplication!
+   alors la priorité à l'addition devant la multiplication !
 
    Ces exemples nous apprennent plusieurs choses:
 
@@ -372,8 +372,7 @@ let parse : token list -> e = fun tokens ->
   in
 
   (* L'analyseur syntaxique suit un algorithme récursif et
-     descendant que nous verrons dans une prochaine séance
-     de cours.
+     descendant.
 
      Il est défini par 4 fonctions mutuellement récursives
      correspondant à chaque cas de la grammaire définie plus
@@ -590,7 +589,7 @@ let test_interpreter () =
   let fail = 42 in
 
   List.iter (do_test invalid (fun x -> x) eval) [
-    "i"                          --> fail;
+    "i"                  --> fail;
     "sum (i, 1, 10, j)"  --> fail
   ]
 
