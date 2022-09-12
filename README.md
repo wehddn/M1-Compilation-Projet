@@ -1,6 +1,6 @@
 # Compilation M1 2022-2023
 
-Ce dépôt contient les documents (notes de cours, projet) relatives au cours de
+Ce dépôt contient les documents (notes de cours, projet) afférents au cours de
 compilation de Master 1 Informatique en 2022-2023.
 
 Les notes de cours sont disponibles dans le dossier [cours/](cours/). Voir en
