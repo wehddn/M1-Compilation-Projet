@@ -20,7 +20,7 @@ let blank         = [' ' '\009' '\012']
 
 let digit         = ['0'-'9']
 
-let id =            ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
+let id            = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let var_id        = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let constr_id     = ['A'-'Z']['A'-'Z''a'-'z''0'-'9''_']*
 let label_id      = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
@@ -52,6 +52,9 @@ rule token = parse
   | '|'             { BAR           }
   | '('             { LPAREN        }
   | ')'             { RPAREN        }
+  | '{'             { LCBRACKET     }
+  | '}'             { RCBRACKET     }  
+  
 
   (** Lexing error. *)
   | _               { error lexbuf "unexpected character." }

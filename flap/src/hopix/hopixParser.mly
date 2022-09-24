@@ -7,165 +7,80 @@
 %}
 
 %token EOF TYPE TYPE_VARIABLE LESS GREATER EQUAL COMMA EXTERN 
-COLON ID BAR CONSTR_ID LPAREN RPAREN LET FUN AND
+COLON ID BAR CONSTR_ID LPAREN RPAREN LET FUN AND LCBRACKET RCBRACKET
 
 
 %start<HopixAST.t> program
 
 %%
 
-program: definition_list EOF
-{
-  []
-}
+program:
+  p=definition_list EOF                 {p}
 
-definition_list: definition
-{
-  []
-}
-| definition_list definition
-{
-  []
-}
+definition_list: 
+  | d=definition                        {[d]}
+  | d=definition dl=definition_list     {d::dl}
 
-definition: TYPE ID definition_continue
-{
-  []
-}
-| EXTERN ID COLON type_scheme
-{
-  []
-}
-| vdefinition
-{
-  []
-}
+definition: 
+  | TYPE tc=ID df=definition_variables dt=definition_tdefinition  {(tc,df,dt)}
+  | EXTERN te=ID COLON ts=type_scheme                             {(te,ts)}
+  | v=vdefinition                                                 {v}
 
-definition_continue:
-{
-  []
-}
-| definition_variables
-{
-  []
-}
-| definition_tdefinition
-{
-  []
-}
-| definition_variables definition_tdefinition
-{
-  []
-}
+definition_variables:
+  |                                                 {[]}
+  | LESS tvl=type_variable_list GREATER             {tvl}
 
-definition_variables: LESS type_variable_list GREATER
-{
-  []
-}
+type_variable_list: 
+  | tv=TYPE_VARIABLE                                {[tv]}  
+  | tv=TYPE_VARIABLE COMMA tvl=type_variable_list   {tv::tvl}
 
-definition_tdefinition: EQUAL tdefinition
-{
-  []
-}
+definition_tdefinition:
+  |                        {[]}
+  | EQUAL t=tdefinition    {t}
 
-type_variable_list: TYPE_VARIABLE 
-{
-  []
-}
-| type_variable_list COMMA TYPE_VARIABLE
-{
-  []
-}
+tdefinition: 
+  | ci=CONSTR_ID ct=tdefinition_types               {[(ci,ct)]}
+  | ctl=constr_type_list                            {ctl}
+  | LCBRACKET tll=tdefinition_label_list RCBRACKET  {tll}
 
-tdefinition: BAR constr tdefinition_end
-{
-  []
-}
-| constr tdefinition_end
-{
-  []
-}
+constr_type_list:
+  | tc=tdefinition_constr                       {tc}
+  | tc=tdefinition_constr ctl=constr_type_list  {tc::ctl}
 
-constr: CONSTR_ID constr_type_list
-{
-  []
-}
-| CONSTR_ID
-{
-  []
-}
+tdefinition_constr: 
+  | BAR ci=CONSTR_ID ct=tdefinition_types       {[(ci,ct)]}
 
-constr_type_list: LPAREN constr_type RPAREN
-{
-  []
-}
+tdefinition_types:
+  |                             {[]}
+  | LPAREN tl=type_list RPAREN  {tl}
 
-constr_type: TYPE 
-{
-  []
-}
-| constr_type COMMA TYPE
-{
-  []
-}
+type_list:
+  | t=typ                       {[t]}
+  | t=typ tl=type_list          {t::tl}
 
-tdefinition_end:
-{
-  []
-}
-| tdefinition_end BAR CONSTR_ID constr_type_list
-{
-  []
-}
+tdefinition_label_list:
+  | tl=tdefinition_label                                    {[tl]}
+  | tl=tdefinition_label COMMA tll=tdefinition_label_list   {tl::tll}
 
-vdefinition:LET ID vdefinition_end
-{
-  []
-}
+tdefinition_label:
+  | id=ID COLON t=typ           {[(id, t)]}
 
-vdefinition_end: COLON type_scheme EQUAL expr
-{
-  []
-}
-| FUN fundef vdefinition_fun_end
-{
-  []
-}
+vdefinition:
+  | LET id=ID EQUAL e=expr                        {[]}                   
+  | LET id=ID COLON ts=type_scheme EQUAL e=expr   {[]}
+  | FUN vf=vdefinition_fun                        {[]}
 
-vdefinition_fun_end:
-{
-  []
-}
-| vdefinition_fun_end AND fundef
-{
-  []
-}
+vdefinition_fun:
+  | fundef                {[]}
+  | fundef AND fundef     {[]}
 
-fundef: BAR type_scheme fundef_end
-{
-  []
-}
-| fundef_end
-{
-  []
-}
+fundef: {[]}
 
-fundef_end: ID pattern EQUAL
-{
-  []
-}
+expr: {[]}
+
+typ: {[]}
 
 type_scheme:
-{
-  []
-}
-
-expr:
-{
-  []
-}
-
-pattern:
 {
   []
 }
