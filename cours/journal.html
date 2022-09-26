@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2022-09-24 Sat 12:11 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Compilation 2022/2023 &#x2013; Journal du cours</title>
+<meta name="author" content="Adrien Guatto" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Compilation 2022/2023 &#x2013; Journal du cours</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org384d3de">1. Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 Mon&gt;</span></span></a>
+<ul>
+<li><a href="#org6adcf88">1.1. Présentation</a></li>
+<li><a href="#org4d7c207">1.2. Contenu et objectifs du cours</a>
+<ul>
+<li><a href="#org99f7f09">1.2.1. Introduction au cours</a></li>
+<li><a href="#org892568a">1.2.2. Pourquoi étudier la compilation ?</a></li>
+</ul>
+</li>
+<li><a href="#org0b9bf8a">1.3. Fonctionnement du cours</a></li>
+<li><a href="#orged90bed">1.4. Introduction à la compilation : le micro-langage Marthe</a></li>
+<li><a href="#orgd71a323">1.5. À préparer pour le prochain TP et le prochain cours</a>
+<ul>
+<li><a href="#org5700d7f">1.5.1. <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</a></li>
+<li><a href="#orgd6b29e9">1.5.2. <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</a></li>
+<li><a href="#orgae4f55d">1.5.3. <span class="todo TODO">TODO</span> Prochain séance de cours</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orge17e882">2. Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 Mon&gt;</span></span></a>
+<ul>
+<li><a href="#org2489f3f">2.1. Message de service</a></li>
+<li><a href="#orgf5d3a88">2.2. Le retour de Marthe</a></li>
+<li><a href="#org4447d29">2.3. Le cours 2</a></li>
+<li><a href="#org4d21d9b">2.4. À préparer pour le prochain TP et le prochain cours</a>
+<ul>
+<li><a href="#orged88cf2">2.4.1. <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</a></li>
+<li><a href="#org02caaf2">2.4.2. <span class="todo TODO">TODO</span> Préparer le dépôt du projet</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+Ce fichier est disponible au
+<a href="https://www.irif.fr/~guatto/teaching/22-23/compilation/journal.html">format
+HTML</a>.
+</p>
+
+<div id="outline-container-org384d3de" class="outline-2">
+<h2 id="org384d3de"><span class="section-number-2">1.</span> Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 Mon&gt;</span></span></h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org6adcf88" class="outline-3">
+<h3 id="org6adcf88"><span class="section-number-3">1.1.</span> Présentation</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Bienvenue en Master 1 !
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Séance</th>
+<th scope="col" class="org-left">Enseignant</th>
+<th scope="col" class="org-left">Horaire</th>
+<th scope="col" class="org-left">Salle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Cours</td>
+<td class="org-left"><a href="mailto:guatto@irif.fr">Adrien Guatto</a></td>
+<td class="org-left">lundi 10h45-12h45</td>
+<td class="org-left">SG 1003</td>
+</tr>
+
+<tr>
+<td class="org-left">TP</td>
+<td class="org-left"><a href="mailto:haberm@irif.fr">Peter Habermehl</a></td>
+<td class="org-left">vendredi 8h30-10h30</td>
+<td class="org-left">SG 2031</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<b>Attention</b> : les séances de TP commencent la même semaine que les cours !
+</p>
+</div>
+</div>
+<div id="outline-container-org4d7c207" class="outline-3">
+<h3 id="org4d7c207"><span class="section-number-3">1.2.</span> Contenu et objectifs du cours</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-org99f7f09" class="outline-4">
+<h4 id="org99f7f09"><span class="section-number-4">1.2.1.</span> Introduction au cours</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+En licence, vous avez acquis les bases de l'informatique : appris à
+programmer dans plusieurs langages, découvert l'algorithmique sous diverses
+formes, vous êtes familiarisés avec l'utilisation d'un système UNIX, etc.
+</p>
+
+<p>
+En master, on ouvre les boîtes noires ! Par exemple, le cours d'architecture
+des ordinateurs vous initie au fonctionnement interne d'un processeur.
+</p>
+
+<p>
+Dans ce cours, on ouvre la boîte noire des langages de programmation :
+comment fonctionne un compilateur ? Comment passer d'un fichier texte
+contenant du code source à un programme que votre processeur peut exécuter ?
+</p>
+
+<p>
+Comprendre le fonctionnement des compilateurs est l'objectif affiché du
+cours. Il y en a un deuxième, un peu caché : vous faire programmer, et
+beaucoup ! Vous allez écrire un compilateur, en OCaml, tout au long du
+semestre, en binôme, de façon guidée. Vous allez pour ce faire utiliser des
+méthodes et outils de développement modernes : gestion de version, tests,
+intégration continue, etc.
+</p>
+</div>
+</div>
+<div id="outline-container-org892568a" class="outline-4">
+<h4 id="org892568a"><span class="section-number-4">1.2.2.</span> Pourquoi étudier la compilation ?</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+Ce n'est pas une compétence directement mobilisable dans la plupart des
+emplois de développeur, même si la demande pour des experts en compilation
+est forte à l'international (exemple : compilation de JavaScript).
+</p>
+
+<p>
+Mais comprendre comment fonctionne un compilateur vous transformera en des
+programmeurs plus mûrs, qui maîtrisent les fondements de leurs outils. C'est
+une aide concrète lorsqu'on programme, et notamment lorsqu'on débogue et
+qu'on a besoin de regarder ``sous le capot''.
+</p>
+
+<p>
+De plus, la compilation est un sujet pluridisciplinaire :
+</p>
+<ul class="org-ul">
+<li>architecture des ordinateurs,</li>
+<li>théorie des graphes</li>
+<li>théorie des langages et automates,</li>
+<li>sémantique des langages de programmation,</li>
+<li>génie logiciel,</li>
+<li>méthodes formelles&#x2026;</li>
+</ul>
+<p>
+Vous allez donc mettre en pratique et revisiter certains concepts que vous
+avez vu dans d'autres cours, ce qui peut vous aider à les assimiler.
+</p>
+
+<p>
+Il va sans dire que la réalisation du projet va aussi beaucoup augmenter
+votre expérience de la programmation. Ce sera pour la majorité d'entre vous
+l'occasion de vous confronter pour la première fois à une base de code
+réaliste !
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org0b9bf8a" class="outline-3">
+<h3 id="org0b9bf8a"><span class="section-number-3">1.3.</span> Fonctionnement du cours</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+Vous avez tous reçu une copie de la description du cours (son <i>syllabus</i>,
+dans le jargon), aussi disponible en ligne sur la page du cours. Prenons le
+temps de le lire ensemble.
+</p>
+
+<p>
+Il se dégage plusieurs principes.
+</p>
+
+<ul class="org-ul">
+<li>Les séances de cours sont centrées sur la réalisation du projet, qui
+oriente les concepts que je vais présenter et nos discussions. Elles se
+veulent interactives et ouvertes à la discussion.</li>
+
+<li>Le projet est structuré en grandes étapes indépendantes, les <i>jalons</i>, qui
+prennent la forme de code à trou : il faudra lire autant qu'écrire !</li>
+
+<li>Vous aurez les énoncés des jalons rapidement, et chaque séance de cours
+débutera par 15 à 30 minutes de travail collectif au sujet des questions
+que vous aurez préparées au sujet des jalons.</li>
+
+<li>Le bon fonctionnement des jalons sera évalué par une batterie de tests
+automatiques.</li>
+</ul>
+
+<p>
+Pour que le cours fonctionne, vos enseignants attendent de vous :
+</p>
+
+<ul class="org-ul">
+<li>que vous travailliez de façon continue et régulière tout le semestre,</li>
+
+<li>que vous rendiez vos jalons à temps (toutes les trois semaines environ),</li>
+
+<li>que vous prêtiez attention à la qualité du code,</li>
+
+<li>en cours : que vous preniez des notes tout en réfléchissant et questionnant
+de façon critique la discussion,</li>
+
+<li>en TP : que vous posiez des questions et discutiez avec l'enseignant et vos
+camarades,</li>
+
+<li>chez vous : que vous lisiez le code du projet ainsi que les documents
+obligatoires et conseillées, que vous programmiez.</li>
+</ul>
+
+<p>
+L'évaluation se fera sur votre compréhension du projet, estimée pour 70% par
+la soutenance, pour 30% par un examen. La soutenance est individuelle, on
+vous demandera d'expliquer votre code, et la qualité de celui-ci sera prise
+en compte.
+</p>
+</div>
+</div>
+<div id="outline-container-orged90bed" class="outline-3">
+<h3 id="orged90bed"><span class="section-number-3">1.4.</span> Introduction à la compilation : le micro-langage Marthe</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+Le reste de la séance est consacré à la lecture et discussion d'un
+micro-langage de programmation, Marthe. Voir le fichier
+<a href="cours-01/marthe.ml">marthe.ml</a>.
+</p>
+</div>
+</div>
+<div id="outline-container-orgd71a323" class="outline-3">
+<h3 id="orgd71a323"><span class="section-number-3">1.5.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div class="outline-text-3" id="text-1-5">
+</div>
+<div id="outline-container-org5700d7f" class="outline-4">
+<h4 id="org5700d7f"><span class="section-number-4">1.5.1.</span> <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<ul class="org-ul">
+<li>Venir avec son ordinateur portable, vendredi</li>
+<li>S'assurer que celui-ci dispose d'un environnement de développement OCaml
+fonctionnel (compilateur OCaml, OPAM, dune).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd6b29e9" class="outline-4">
+<h4 id="orgd6b29e9"><span class="section-number-4">1.5.2.</span> <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<p>
+<a href="https://listes.u-paris.fr/wws/info/m1.2022.compilation.info">https://listes.u-paris.fr/wws/info/m1.2022.compilation.info</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orgae4f55d" class="outline-4">
+<h4 id="orgae4f55d"><span class="section-number-4">1.5.3.</span> <span class="todo TODO">TODO</span> Prochain séance de cours</h4>
+<div class="outline-text-4" id="text-1-5-3">
+<ul class="org-ul">
+<li>Finir la gestion des commentaires dans <code>marthe.ml</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orge17e882" class="outline-2">
+<h2 id="orge17e882"><span class="section-number-2">2.</span> Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 Mon&gt;</span></span></h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org2489f3f" class="outline-3">
+<h3 id="org2489f3f"><span class="section-number-3">2.1.</span> Message de service</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+La liste a été configurée correctement, les étudiants et étudiantes peuvent
+désormais s'inscrire avec leur adresse courriel favorite.
+</p>
+
+<p>
+<a href="https://listes.u-paris.fr/wws/info/m1.2022.compilation.info">https://listes.u-paris.fr/wws/info/m1.2022.compilation.info</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orgf5d3a88" class="outline-3">
+<h3 id="orgf5d3a88"><span class="section-number-3">2.2.</span> Le retour de Marthe</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Dans <a href="cours-01/marthe.ml">marthe.ml</a>, on ajoute les commentaires à
+l'analyseur lexical, et on lit l'analyseur syntaxique.
+</p>
+</div>
+</div>
+<div id="outline-container-org4447d29" class="outline-3">
+<h3 id="org4447d29"><span class="section-number-3">2.3.</span> Le cours 2</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
+</p>
+</div>
+</div>
+<div id="outline-container-org4d21d9b" class="outline-3">
+<h3 id="org4d21d9b"><span class="section-number-3">2.4.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div class="outline-text-3" id="text-2-4">
+</div>
+<div id="outline-container-orged88cf2" class="outline-4">
+<h4 id="orged88cf2"><span class="section-number-4">2.4.1.</span> <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</h4>
+<div class="outline-text-4" id="text-2-4-1">
+<ul class="org-ul">
+<li><a href="https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html">https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html</a></li>
+<li><a href="http://pauillac.inria.fr/~fpottier/menhir/manual.pdf">http://pauillac.inria.fr/~fpottier/menhir/manual.pdf</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org02caaf2" class="outline-4">
+<h4 id="org02caaf2"><span class="section-number-4">2.4.2.</span> <span class="todo TODO">TODO</span> Préparer le dépôt du projet</h4>
+<div class="outline-text-4" id="text-2-4-2">
+<ul class="org-ul">
+<li>Forker le dépôt Git du projet</li>
+</ul>
+<p>
+<a href="https://gaufre.informatique.univ-paris-diderot.fr/aguatto/compilation-m1-2022">https://gaufre.informatique.univ-paris-diderot.fr/aguatto/compilation-m1-2022</a>
+</p>
+<ul class="org-ul">
+<li>Passer votre fork du dépôt en visibilité privée</li>
+<li>Ajouter l'accès à l'équipe enseignante
+<ul class="org-ul">
+<li>Adrien Guatto @aguatto</li>
+<li>Peter Habermehl @habermeh</li>
+</ul></li>
+<li>Remplir le fichier AUTEURS du dépôt</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Auteur: Adrien Guatto</p>
+<p class="date">Created: 2022-09-24 Sat 12:11</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

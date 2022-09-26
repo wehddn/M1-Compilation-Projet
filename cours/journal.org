@@ -11,6 +11,10 @@
 #+LATEX_HEADER: \usepackage[french]{babel}
 # (org-latex-export-to-pdf)
 
+  Ce fichier est disponible au
+  [[https://www.irif.fr/~guatto/teaching/22-23/compilation/journal.html][format
+  HTML]].
+
 * Cours 1 : Introduction <2022-09-12>
 ** Présentation
    Bienvenue en Master 1 !
@@ -121,3 +125,26 @@
     https://listes.u-paris.fr/wws/info/m1.2022.compilation.info
 *** TODO Prochain séance de cours
     - Finir la gestion des commentaires dans ~marthe.ml~.
+* Cours 2 <2022-09-19>
+** Message de service
+   La liste a été configurée correctement, les étudiants et étudiantes peuvent
+   désormais s'inscrire avec leur adresse courriel favorite.
+
+   https://listes.u-paris.fr/wws/info/m1.2022.compilation.info
+** Le retour de Marthe
+   Dans [[file:cours-01/marthe.ml][marthe.ml]], on ajoute les commentaires à
+   l'analyseur lexical, et on lit l'analyseur syntaxique.
+** Le cours 2
+   Voir les [[file:cours-02/cours-02-parsing.pdf][transparents]].
+** À préparer pour le prochain TP et le prochain cours
+*** TODO Lire la documentation des outils ocamllex et Menhir
+    - [[https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html]]
+    - [[http://pauillac.inria.fr/~fpottier/menhir/manual.pdf]]
+*** TODO Préparer le dépôt du projet
+    - Forker le dépôt Git du projet
+    https://gaufre.informatique.univ-paris-diderot.fr/aguatto/compilation-m1-2022
+    - Passer votre fork du dépôt en visibilité privée
+    - Ajouter l'accès à l'équipe enseignante
+      - Adrien Guatto @aguatto
+      - Peter Habermehl @habermeh
+    - Remplir le fichier AUTEURS du dépôt
