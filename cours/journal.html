@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
 <head>
-<!-- 2022-09-24 Sat 12:11 -->
+<!-- 2022-09-26 lun. 14:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Compilation 2022/2023 &#x2013; Journal du cours</title>
@@ -201,37 +201,43 @@
 <h2>Table des matières</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org384d3de">1. Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 Mon&gt;</span></span></a>
+<li><a href="#orgd1a446c">1. Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org6adcf88">1.1. Présentation</a></li>
-<li><a href="#org4d7c207">1.2. Contenu et objectifs du cours</a>
+<li><a href="#orgd10b501">1.1. Présentation</a></li>
+<li><a href="#orgaa076ed">1.2. Contenu et objectifs du cours</a>
 <ul>
-<li><a href="#org99f7f09">1.2.1. Introduction au cours</a></li>
-<li><a href="#org892568a">1.2.2. Pourquoi étudier la compilation ?</a></li>
+<li><a href="#orge755493">1.2.1. Introduction au cours</a></li>
+<li><a href="#orga3083db">1.2.2. Pourquoi étudier la compilation ?</a></li>
 </ul>
 </li>
-<li><a href="#org0b9bf8a">1.3. Fonctionnement du cours</a></li>
-<li><a href="#orged90bed">1.4. Introduction à la compilation : le micro-langage Marthe</a></li>
-<li><a href="#orgd71a323">1.5. À préparer pour le prochain TP et le prochain cours</a>
+<li><a href="#org450f742">1.3. Fonctionnement du cours</a></li>
+<li><a href="#org76fab59">1.4. Introduction à la compilation : le micro-langage Marthe</a></li>
+<li><a href="#org7f68de7">1.5. À préparer pour le prochain TP et le prochain cours</a>
 <ul>
-<li><a href="#org5700d7f">1.5.1. <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</a></li>
-<li><a href="#orgd6b29e9">1.5.2. <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</a></li>
-<li><a href="#orgae4f55d">1.5.3. <span class="todo TODO">TODO</span> Prochain séance de cours</a></li>
+<li><a href="#org39812be">1.5.1. <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</a></li>
+<li><a href="#org79b7283">1.5.2. <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</a></li>
+<li><a href="#org186700c">1.5.3. <span class="todo TODO">TODO</span> Prochain séance de cours</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orge17e882">2. Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 Mon&gt;</span></span></a>
+<li><a href="#org9cd8d1d">2. Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org2489f3f">2.1. Message de service</a></li>
-<li><a href="#orgf5d3a88">2.2. Le retour de Marthe</a></li>
-<li><a href="#org4447d29">2.3. Le cours 2</a></li>
-<li><a href="#org4d21d9b">2.4. À préparer pour le prochain TP et le prochain cours</a>
+<li><a href="#org07bef50">2.1. Message de service</a></li>
+<li><a href="#orgaa2f7cf">2.2. Le retour de Marthe</a></li>
+<li><a href="#org849b444">2.3. Le cours 2</a></li>
+<li><a href="#org303c3a7">2.4. À préparer pour le prochain TP et le prochain cours</a>
 <ul>
-<li><a href="#orged88cf2">2.4.1. <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</a></li>
-<li><a href="#org02caaf2">2.4.2. <span class="todo TODO">TODO</span> Préparer le dépôt du projet</a></li>
+<li><a href="#org8595d57">2.4.1. <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</a></li>
+<li><a href="#org2f8322b">2.4.2. <span class="todo TODO">TODO</span> Préparer le dépôt du projet</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a href="#org0435cde">3. Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></a>
+<ul>
+<li><a href="#orgbd829cc">3.1. Introduction au jalon 1 et au compilateur flap</a></li>
+<li><a href="#orgc9d1cdc">3.2. La prochaine fois</a></li>
 </ul>
 </li>
 </ul>
@@ -243,12 +249,12 @@ Ce fichier est disponible au
 HTML</a>.
 </p>
 
-<div id="outline-container-org384d3de" class="outline-2">
-<h2 id="org384d3de"><span class="section-number-2">1.</span> Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 Mon&gt;</span></span></h2>
+<div id="outline-container-orgd1a446c" class="outline-2">
+<h2 id="orgd1a446c"><span class="section-number-2">1.</span> Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org6adcf88" class="outline-3">
-<h3 id="org6adcf88"><span class="section-number-3">1.1.</span> Présentation</h3>
+<div id="outline-container-orgd10b501" class="outline-3">
+<h3 id="orgd10b501"><span class="section-number-3">1.1.</span> Présentation</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Bienvenue en Master 1 !
@@ -296,12 +302,12 @@ Bienvenue en Master 1 !
 </p>
 </div>
 </div>
-<div id="outline-container-org4d7c207" class="outline-3">
-<h3 id="org4d7c207"><span class="section-number-3">1.2.</span> Contenu et objectifs du cours</h3>
+<div id="outline-container-orgaa076ed" class="outline-3">
+<h3 id="orgaa076ed"><span class="section-number-3">1.2.</span> Contenu et objectifs du cours</h3>
 <div class="outline-text-3" id="text-1-2">
 </div>
-<div id="outline-container-org99f7f09" class="outline-4">
-<h4 id="org99f7f09"><span class="section-number-4">1.2.1.</span> Introduction au cours</h4>
+<div id="outline-container-orge755493" class="outline-4">
+<h4 id="orge755493"><span class="section-number-4">1.2.1.</span> Introduction au cours</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 En licence, vous avez acquis les bases de l'informatique : appris à
@@ -330,8 +336,8 @@ intégration continue, etc.
 </p>
 </div>
 </div>
-<div id="outline-container-org892568a" class="outline-4">
-<h4 id="org892568a"><span class="section-number-4">1.2.2.</span> Pourquoi étudier la compilation ?</h4>
+<div id="outline-container-orga3083db" class="outline-4">
+<h4 id="orga3083db"><span class="section-number-4">1.2.2.</span> Pourquoi étudier la compilation ?</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 Ce n'est pas une compétence directement mobilisable dans la plupart des
@@ -371,8 +377,8 @@ réaliste !
 </div>
 </div>
 </div>
-<div id="outline-container-org0b9bf8a" class="outline-3">
-<h3 id="org0b9bf8a"><span class="section-number-3">1.3.</span> Fonctionnement du cours</h3>
+<div id="outline-container-org450f742" class="outline-3">
+<h3 id="org450f742"><span class="section-number-3">1.3.</span> Fonctionnement du cours</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 Vous avez tous reçu une copie de la description du cours (son <i>syllabus</i>,
@@ -429,8 +435,8 @@ en compte.
 </p>
 </div>
 </div>
-<div id="outline-container-orged90bed" class="outline-3">
-<h3 id="orged90bed"><span class="section-number-3">1.4.</span> Introduction à la compilation : le micro-langage Marthe</h3>
+<div id="outline-container-org76fab59" class="outline-3">
+<h3 id="org76fab59"><span class="section-number-3">1.4.</span> Introduction à la compilation : le micro-langage Marthe</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 Le reste de la séance est consacré à la lecture et discussion d'un
@@ -439,12 +445,12 @@ micro-langage de programmation, Marthe. Voir le fichier
 </p>
 </div>
 </div>
-<div id="outline-container-orgd71a323" class="outline-3">
-<h3 id="orgd71a323"><span class="section-number-3">1.5.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div id="outline-container-org7f68de7" class="outline-3">
+<h3 id="org7f68de7"><span class="section-number-3">1.5.</span> À préparer pour le prochain TP et le prochain cours</h3>
 <div class="outline-text-3" id="text-1-5">
 </div>
-<div id="outline-container-org5700d7f" class="outline-4">
-<h4 id="org5700d7f"><span class="section-number-4">1.5.1.</span> <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</h4>
+<div id="outline-container-org39812be" class="outline-4">
+<h4 id="org39812be"><span class="section-number-4">1.5.1.</span> <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</h4>
 <div class="outline-text-4" id="text-1-5-1">
 <ul class="org-ul">
 <li>Venir avec son ordinateur portable, vendredi</li>
@@ -453,16 +459,16 @@ fonctionnel (compilateur OCaml, OPAM, dune).</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd6b29e9" class="outline-4">
-<h4 id="orgd6b29e9"><span class="section-number-4">1.5.2.</span> <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</h4>
+<div id="outline-container-org79b7283" class="outline-4">
+<h4 id="org79b7283"><span class="section-number-4">1.5.2.</span> <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</h4>
 <div class="outline-text-4" id="text-1-5-2">
 <p>
 <a href="https://listes.u-paris.fr/wws/info/m1.2022.compilation.info">https://listes.u-paris.fr/wws/info/m1.2022.compilation.info</a>
 </p>
 </div>
 </div>
-<div id="outline-container-orgae4f55d" class="outline-4">
-<h4 id="orgae4f55d"><span class="section-number-4">1.5.3.</span> <span class="todo TODO">TODO</span> Prochain séance de cours</h4>
+<div id="outline-container-org186700c" class="outline-4">
+<h4 id="org186700c"><span class="section-number-4">1.5.3.</span> <span class="todo TODO">TODO</span> Prochain séance de cours</h4>
 <div class="outline-text-4" id="text-1-5-3">
 <ul class="org-ul">
 <li>Finir la gestion des commentaires dans <code>marthe.ml</code>.</li>
@@ -471,12 +477,12 @@ fonctionnel (compilateur OCaml, OPAM, dune).</li>
 </div>
 </div>
 </div>
-<div id="outline-container-orge17e882" class="outline-2">
-<h2 id="orge17e882"><span class="section-number-2">2.</span> Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 Mon&gt;</span></span></h2>
+<div id="outline-container-org9cd8d1d" class="outline-2">
+<h2 id="org9cd8d1d"><span class="section-number-2">2.</span> Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org2489f3f" class="outline-3">
-<h3 id="org2489f3f"><span class="section-number-3">2.1.</span> Message de service</h3>
+<div id="outline-container-org07bef50" class="outline-3">
+<h3 id="org07bef50"><span class="section-number-3">2.1.</span> Message de service</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 La liste a été configurée correctement, les étudiants et étudiantes peuvent
@@ -488,8 +494,8 @@ désormais s'inscrire avec leur adresse courriel favorite.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf5d3a88" class="outline-3">
-<h3 id="orgf5d3a88"><span class="section-number-3">2.2.</span> Le retour de Marthe</h3>
+<div id="outline-container-orgaa2f7cf" class="outline-3">
+<h3 id="orgaa2f7cf"><span class="section-number-3">2.2.</span> Le retour de Marthe</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Dans <a href="cours-01/marthe.ml">marthe.ml</a>, on ajoute les commentaires à
@@ -497,20 +503,20 @@ l'analyseur lexical, et on lit l'analyseur syntaxique.
 </p>
 </div>
 </div>
-<div id="outline-container-org4447d29" class="outline-3">
-<h3 id="org4447d29"><span class="section-number-3">2.3.</span> Le cours 2</h3>
+<div id="outline-container-org849b444" class="outline-3">
+<h3 id="org849b444"><span class="section-number-3">2.3.</span> Le cours 2</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-org4d21d9b" class="outline-3">
-<h3 id="org4d21d9b"><span class="section-number-3">2.4.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div id="outline-container-org303c3a7" class="outline-3">
+<h3 id="org303c3a7"><span class="section-number-3">2.4.</span> À préparer pour le prochain TP et le prochain cours</h3>
 <div class="outline-text-3" id="text-2-4">
 </div>
-<div id="outline-container-orged88cf2" class="outline-4">
-<h4 id="orged88cf2"><span class="section-number-4">2.4.1.</span> <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</h4>
+<div id="outline-container-org8595d57" class="outline-4">
+<h4 id="org8595d57"><span class="section-number-4">2.4.1.</span> <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <ul class="org-ul">
 <li><a href="https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html">https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html</a></li>
@@ -518,8 +524,8 @@ Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </ul>
 </div>
 </div>
-<div id="outline-container-org02caaf2" class="outline-4">
-<h4 id="org02caaf2"><span class="section-number-4">2.4.2.</span> <span class="todo TODO">TODO</span> Préparer le dépôt du projet</h4>
+<div id="outline-container-org2f8322b" class="outline-4">
+<h4 id="org2f8322b"><span class="section-number-4">2.4.2.</span> <span class="todo TODO">TODO</span> Préparer le dépôt du projet</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <ul class="org-ul">
 <li>Forker le dépôt Git du projet</li>
@@ -540,10 +546,34 @@ Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </div>
 </div>
 </div>
+<div id="outline-container-org0435cde" class="outline-2">
+<h2 id="org0435cde"><span class="section-number-2">3.</span> Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orgbd829cc" class="outline-3">
+<h3 id="orgbd829cc"><span class="section-number-3">3.1.</span> Introduction au jalon 1 et au compilateur flap</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Voir le <a href="../flap">code</a> du compilateur Flap, ainsi que l'énoncé du
+<a href="../jalons/jalon-1.pdf">jalon 1</a>.
+</p>
+</div>
+</div>
+<div id="outline-container-orgc9d1cdc" class="outline-3">
+<h3 id="orgc9d1cdc"><span class="section-number-3">3.2.</span> La prochaine fois</h3>
+<div class="outline-text-3" id="text-3-2">
+<ul class="org-ul">
+<li>On terminera de lire <code>marthe.ml</code>.</li>
+
+<li>On commencera une séquence de cours au sujet des langages de programmation.</li>
+</ul>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Auteur: Adrien Guatto</p>
-<p class="date">Created: 2022-09-24 Sat 12:11</p>
+<p class="date">Created: 2022-09-26 lun. 14:52</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
