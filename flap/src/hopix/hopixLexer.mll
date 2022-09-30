@@ -47,6 +47,18 @@ rule token = parse
   | "let"                 { LET           }
   | "fun"                 { FUN           }
   | "and"                 { AND           }
+  | "match"               { MATCH         }
+  | "if"                  { IF            }
+  | "then"                { THEN          }
+  | "else"                { ELSE          }
+  | "ref"                 { REF           }
+  | "while"               { WHILE         }
+  | "do"                  { DO            }
+  | "until"               { UNTIL         }
+  | "for"                 { FOR           }
+  | "from"                { FROM          }
+  | "to"                  { TO            }
+  | "->"                  { ARROW         }
   | id as id              { ID id         }
   | type_variable as tv   { TYPE_VARIABLE tv }
   | constr_id as ci       { CONSTR_ID ci  }
@@ -64,6 +76,11 @@ rule token = parse
   | '}'                   { RCBRACKET     }
   | '['                   { LSBRACKET     }
   | ']'                   { RSBRACKET     }
+  | '.'                   { DOT           }
+  | '\'                   { BACKSLASH     }
+  | '!'                   { EXCLAMATION   }
+  | ';'                   { SEMICOLON     }
+
   
 
   (** Lexing error. *)
