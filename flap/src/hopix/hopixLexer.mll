@@ -20,15 +20,21 @@ let blank         = [' ' '\009' '\012']
 
 let digit         = ['0'-'9']
 
-let id            = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
+
+
+(* id!!!
+char -{'} et delete
+ *)
+let id            = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*  
 let var_id        = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let constr_id     = ['A'-'Z']['A'-'Z''a'-'z''0'-'9''_']*
 let label_id      = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let type_con      = ['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let type_variable = '\''['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let int           = '-'?['0'-'9']+|'0''x'['0'-'9''a'-'f''A'-'F']+|'0''b'['0'-'1']+|'0''o'['0'-'7']+
-let atom          = ('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])|['\\''n''t''b''r']))|[' '-'~']
+let atom          = ('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])|['\\''\'''n''t''b''r']))|[' '-'~']
 let char          = [''']atom[''']
+let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])|['\\''\'''n''t''b''r']))|([' '-'~']#['"'])*)'"'
 
 
 rule token = parse
@@ -52,10 +58,12 @@ rule token = parse
   | "for"                 { FOR           }
   | "from"                { FROM          }
   | "to"                  { TO            }
-  | id as i               { ID i          }
+  | "->"                  { ARROW         }
+  | id as id              { ID id         }
   | type_variable as tv   { TYPE_VARIABLE tv }
   | constr_id as ci       { CONSTR_ID ci  }
-  | "->"                  { ARROW         }
+  | string as s           { STRING s      }
+  | char as c             { CHAR c        }
   | '<'                   { LESS          }
   | '>'                   { GREATER       }
   | '='                   { EQUAL         }
