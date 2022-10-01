@@ -48,7 +48,7 @@ all.results: $(JALONS)
 	fi
 
 %.output: %.parsing.hopix $(FLAP)
-	@$(FLAP) -s hopix --verbose true --dry true --unsafe true \
+	@$(FLAP) -s hopix --verbose true --dry true --unsafe true --loc false \
 		$< >$@ 2>&1; exit 0
 
 %.output: %.eval.hopix $(FLAP)
@@ -57,7 +57,7 @@ all.results: $(JALONS)
 
 %.output: %.typing.hopix $(FLAP)
 	@$(FLAP) -s hopix --run false --dry true --unsafe false --sexp-in true \
-		--types true $< >$@ 2>&1; exit 0
+		--types true --loc false $< >$@ 2>&1; exit 0
 
 %.output: %.retrolix $(FLAP)
 	@$(FLAP) -s retrolix -t elf --run true -VV true $< >$@ 2>&1; exit 0

@@ -4,12 +4,16 @@ let exit_on_error () = exit_flag := true
 
 let resume_on_error () = exit_flag := false
 
+let print_locs = ref true
+
 exception Error of Position.t list * string
 
 let print_error positions msg =
   Printf.sprintf "%s%s\n"
-    (String.concat "\n"
-       (List.map (fun p -> Position.string_of_pos p ^": ") positions))
+    (if !print_locs
+     then String.concat "\n"
+            (List.map (fun p -> Position.string_of_pos p ^": ") positions)
+     else "")
     msg
 
 let error_alert positions msg =

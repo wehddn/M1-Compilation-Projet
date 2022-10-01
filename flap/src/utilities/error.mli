@@ -1,4 +1,4 @@
-(** This module provides a uniform way of reporting (located) error message. *)
+(** This module provides a uniform way of reporting (located) error messages. *)
 
 (** [exit_on_error ()] forces the program to stop if an error is encountered.
     (This is the default behavior.) *)
@@ -7,6 +7,10 @@ val exit_on_error: unit -> unit
 (** [resume_on_error ()] makes the program throw the exception {!Error}
     if an error is encountered. *)
 val resume_on_error: unit -> unit
+
+(** The value of [print_locs] controls whether locations are printed by the
+    functions of this module. It is set to [true] by default. *)
+val print_locs : bool ref
 
 exception Error of Position.t list * string
 
