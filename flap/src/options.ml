@@ -62,6 +62,7 @@ let set_fast_match, get_fast_match     = Ref.as_functions false
 let set_backend, get_backend           = Ref.as_functions "x86-64"
 let set_regalloc, get_regalloc         = Ref.as_functions "naive"
 let set_debug_mode, get_debug_mode     = Ref.as_functions false
+let set_print_locs, get_print_locs     = Ref.functions_of_ref Error.print_locs
 
 let get_architecture () : (module Architecture.S) =
   match get_backend () with

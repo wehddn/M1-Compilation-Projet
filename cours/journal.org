@@ -148,3 +148,11 @@
       - Adrien Guatto @aguatto
       - Peter Habermehl @habermeh
     - Remplir le fichier AUTEURS du dépôt
+* Cours 03 <2022-09-26>
+** Introduction au jalon 1 et au compilateur flap
+   Voir le [[file:../flap][code]] du compilateur Flap, ainsi que l'énoncé du
+   [[../jalons/jalon-1.pdf][jalon 1]].
+** La prochaine fois
+   - On terminera de lire ~marthe.ml~.
+
+   - On commencera une séquence de cours au sujet des langages de programmation.

@@ -2,9 +2,11 @@
 
 module Ref = struct
 
-  let as_functions default =
-    let r = ref default in
+  let functions_of_ref r =
     (fun x -> r := x), (fun () -> !r)
+
+  let as_functions default =
+    functions_of_ref (ref default)
 
 end
 

@@ -145,6 +145,10 @@ let generic_options () = Arg.(align (List.flatten [
     (Bool Options.set_debug_mode)
     ("(true|false) Ask the compiler to dump internal information");
 
+  options
+    ["--loc"; "-l"]
+    (Bool Options.set_print_locs)
+    ("(true|false) Ask the compiler to print locations in error messages");
 
 ] @ (List.flatten (optimizers_options ()))))
 

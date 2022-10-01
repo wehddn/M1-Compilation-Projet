@@ -55,7 +55,7 @@ and expression =
   | Assign of expression located * expression located
   (** A dereference. *)
   | Read of expression located
-  (** A pattern matching [switch (e) { p₁ -> e₁ | ... | pₙ -> eₙ }. *)
+  (** A pattern matching [match (e) { p₁ -> e₁ | ... | pₙ -> eₙ }]. *)
   | Case of expression located * branch located list
   (** A conditional expression of the form [if (...) ... else ...]. *)
   | IfThenElse of expression located * expression located * expression located
