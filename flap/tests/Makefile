@@ -5,7 +5,8 @@ JALONS=\
 	03-Typing.results \
 	04-Retrolix_to_x86-64.results \
 	06-Hobix_to_Fopix.results
-EXTS=parsing.hopix eval.hopix typing.hopix hobix fopix retrolix
+EXTS=parsing.hopix parsing-with-positions.hopix eval.hopix typing.hopix \
+	hobix fopix retrolix
 
 .PHONY: all clean test FAKE
 .PRECIOUS: %.output %.expected %.score
@@ -49,6 +50,10 @@ all.results: $(JALONS)
 
 %.output: %.parsing.hopix $(FLAP)
 	@$(FLAP) -s hopix --verbose true --dry true --unsafe true --loc false \
+		$< >$@ 2>&1; exit 0
+
+%.output: %.parsing-with-positions.hopix $(FLAP)
+	@$(FLAP) -s hopix --verbose true --dry true --unsafe true \
 		$< >$@ 2>&1; exit 0
 
 %.output: %.eval.hopix $(FLAP)
