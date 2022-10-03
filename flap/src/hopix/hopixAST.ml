@@ -41,7 +41,7 @@ and expression =
   | Field of expression located * label located
   (** A tuple [(e₁, ..., en)]. *)
   | Tuple of expression located list
-  (** A sequence [e1; e2] *)
+  (** A sequence [e₁ ; ... ; eₙ] *)
   | Sequence of expression located list
   (** A local definition of value(s) [value_definition; e₂]. *)
   | Define of value_definition * expression located
