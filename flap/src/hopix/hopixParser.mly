@@ -88,15 +88,17 @@ pattern:
   | p=located(pattern) COMMA t=located(ty) {PTypeAnnotation(p,t)}
   | l=located(literal) {PLiteral(l)}
   | pt=pattern_tcon {pt}
-  | LCBRACKET located(id) EQUAL pattern {PRecord([],None)}
+  | pl=pattern_label ty=pattern_ty {PRecord(pl,ty)}
   | p1=located(pattern) BAR p2=located(pattern) {POr(p1::[p2])}
   | p1=located(pattern) AMPERSAND p2=located(pattern) {POr(p1::[p2])}
 
+pattern_label: LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(pattern))) RCBRACKET {idp}
+
 pattern_tuple: p=delimited(LPAREN, separated_nonempty_list(COMMA, located(pattern)), RPAREN) {p}
 
-pattern_tcon: t=located(cid) ty=pattern_ty? p=loption(pattern_tuple) {PTaggedValue(t,ty,p)}
+pattern_tcon: t=located(cid) ty=pattern_ty p=loption(pattern_tuple) {PTaggedValue(t,ty,p)}
 
-pattern_ty: ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER) {ty}
+pattern_ty: ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? {ty}
 
 %inline located(X): x=X {
   Position.with_poss $startpos $endpos x
