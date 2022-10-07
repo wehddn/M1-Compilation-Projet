@@ -77,6 +77,7 @@ rule token = parse
   | ';'                   { SEMICOLON     }
   | '*'                   { STAR          }
   | '_'                   { UNDERSCORE    }
+  | '&'                   { AMPERSAND     }
 
   
 
