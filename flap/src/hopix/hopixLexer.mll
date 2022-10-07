@@ -53,6 +53,7 @@ rule token = parse
   | "from"                { FROM          }
   | "to"                  { TO            }
   | "->"                  { ARROW         }
+  | ":="                  { ASSIGN        }
   | id as id              { ID id         }
   | type_variable as tv   { TYPE_VARIABLE tv }
   | constr_id as ci       { CONSTR_ID ci  }
