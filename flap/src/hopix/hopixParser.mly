@@ -64,18 +64,25 @@ tdefinition_label: id=located(id) COLON t=located(ty)           {(id, t)}
 id: i=ID {LId(i)}
 
 ty:
-(*  | tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)} *)
+  (*| tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}*)
   | t1=located(ty) ARROW t2=located(ty) {TyArrow(t1,t2)}
-(*  | t=separated_nonempty_list(STAR, located(ty)) {TyTuple(t)} *)
+  (*| t=separated_nonempty_list(STAR, located(ty)) {TyTuple(t)}*) 
   | t=tid {TyVar(t)}
   | t=delimited(LPAREN, ty, RPAREN) {t}
 
 expr:
   | l=located(literal)  {Literal(l)}
+  | vid=located(varid) tyl=tyList {Variable(vid,tyl)}
+  | cid=located(cid) tyl=tyList expl=loption(delimited(LPAREN, separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tagged(cid,tyl,expl)}
+  | tupl=loption(delimited(LPAREN,separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tuple(tupl)}
+
+tyList:
+  | l=loption(delimited(LESS,separated_nonempty_list(COMMA,located(ty)),GREATER))  {Some l}
 
 literal:
   | i=INT {LInt(i)}
   | s=STRING {LString(s)}
+  | c=CHAR {LChar(c.[0])}
 
 type_scheme:
   | tsv=loption(delimited(LSBRACKET, located(tid)+, RSBRACKET)) ty=located(ty)  {ForallTy(tsv,ty)}
