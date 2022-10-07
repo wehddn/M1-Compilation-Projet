@@ -7,12 +7,12 @@
 
 %token EOF TYPE LESS GREATER EQUAL COMMA EXTERN 
 COLON BAR LPAREN RPAREN LET FUN AND MATCH IF THEN ELSE REF WHILE DO UNTIL FOR FROM TO LCBRACKET RCBRACKET 
-LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE
+LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AMPERSAND
 
 %token <string> ID TYPE_VARIABLE CONSTR_ID STRING CHAR
 %token <Mint.t> INT
 
-%left ARROW
+%left ARROW BAR COMMA EQUAL AMPERSAND STAR
 
 %start<HopixAST.t> program
 
@@ -66,7 +66,7 @@ id: i=ID {LId(i)}
 ty:
   (*| tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}*)
   | t1=located(ty) ARROW t2=located(ty) {TyArrow(t1,t2)}
-  (*| t=separated_nonempty_list(STAR, located(ty)) {TyTuple(t)}*) 
+  | t1=located(ty) STAR t2=located(ty) {TyTuple(t1::[t2])}
   | t=tid {TyVar(t)}
   | t=delimited(LPAREN, ty, RPAREN) {t}
 
@@ -94,6 +94,9 @@ pattern:
   | p=located(pattern) COMMA t=located(ty) {PTypeAnnotation(p,t)}
   | l=located(literal) {PLiteral(l)}
   | pt=pattern_tcon {pt}
+  | LCBRACKET located(id) EQUAL pattern {PRecord([],None)}
+  | p1=located(pattern) BAR p2=located(pattern) {POr(p1::[p2])}
+  | p1=located(pattern) AMPERSAND p2=located(pattern) {POr(p1::[p2])}
 
 pattern_tuple: p=delimited(LPAREN, separated_nonempty_list(COMMA, located(pattern)), RPAREN) {p}
 
