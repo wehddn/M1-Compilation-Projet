@@ -1,2 +1,7 @@
-Line 3, characters 2-3: Error (parsing)
-  Syntax error.
+let menu =
+  match (choice) {
+  | (Coffee | Tea) -> OK
+  | Chocolate -> OK
+  | Beer -> AreYouSure
+  | _ -> KO
+  }
