@@ -1,11 +1,8 @@
 FLAP?=../_build/default/src/flap.exe
 JALONS=\
-	01-Parsing.results \
-	02-Interpreter.results \
-	03-Typing.results \
-	04-Retrolix_to_x86-64.results \
-	06-Hobix_to_Fopix.results
-EXTS=parsing.hopix eval.hopix typing.hopix hobix fopix retrolix
+	01-Parsing.results
+EXTS=parsing.hopix parsing-no-positions.hopix eval.hopix typing.hopix \
+	hobix fopix retrolix
 
 .PHONY: all clean test FAKE
 .PRECIOUS: %.output %.expected %.score
@@ -48,6 +45,10 @@ all.results: $(JALONS)
 	fi
 
 %.output: %.parsing.hopix $(FLAP)
+	@$(FLAP) -s hopix --verbose true --dry true --unsafe true --loc true \
+		$< >$@ 2>&1; exit 0
+
+%.output: %.parsing-no-positions.hopix $(FLAP)
 	@$(FLAP) -s hopix --verbose true --dry true --unsafe true --loc false \
 		$< >$@ 2>&1; exit 0
 

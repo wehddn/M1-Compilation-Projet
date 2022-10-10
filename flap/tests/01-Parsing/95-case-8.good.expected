@@ -1,2 +1,1 @@
-Error (parsing)
-  Syntax error.
+let polybox = match (x) { | {box = y}  < int > -> y }

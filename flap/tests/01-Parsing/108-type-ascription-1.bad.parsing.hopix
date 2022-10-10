@@ -1,2 +1,2 @@
 let main =
- switch you { (me : int) -> me }
+ match you { (me : int) -> me }

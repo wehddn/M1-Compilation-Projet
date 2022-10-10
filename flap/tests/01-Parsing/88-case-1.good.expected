@@ -1,2 +1,4 @@
-Error (parsing)
-  Syntax error.
+let style_evaluation =
+  match (hair_color) {
+  | Red -> Good | Yellow -> Good | Brown -> Good | _ -> Good
+  }

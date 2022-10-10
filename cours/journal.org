@@ -156,3 +156,39 @@
    - On terminera de lire ~marthe.ml~.
 
    - On commencera une séquence de cours au sujet des langages de programmation.
+* Cours 04 <2022-10-03>
+** Suivi du projet
+*** Pourquoi n'y a-t-il pas de ~if <expr> then <expr>~ dans l'AST Hopix ?
+    Une partie du /sucre syntaxique/ est éliminée lors de l'analyse
+    syntaxique. C'est le cas du ~if <expr> then <expr>~ qui se /désucre/ de la
+    même façon que celui d'OCaml.
+*** Comment gérer les positions ?
+    Menhir ne connaît pas le fichier source, uniquement le ~lexbuf~. C'est donc
+    à l'analyseur lexical de remplir ce dernier correctement pour que
+    l'analyseur syntaxique puisse avoir accès à l'information de position. Voir
+    le type ~Lexing.lexbuf~ pour cette information de position.
+
+    L'analyseur lexical doit essentiellement détecter les nouvelles lignes pour
+    mettre à jour le ~lexbuf~. Cf. ~Lexing.new_line~, déjà utilisée dans le
+    fichier l'analyseur lexical fourni.
+
+    Les règles de l'analyseur syntaxique peut ensuite utiliser les variables
+    Menhir ~$startpos~ et ~$endpos~. Dans le fichier fourni, leur utilisation
+    passera par la règle paramétrique ~located(X)~.
+
+    #+BEGIN_VERBATIM
+%inline located(X): x=X {
+  Position.with_poss $startpos $endpos x
+}
+    #+END_VERBATIM
+
+    On peut utiliser cette règle pour analyser une valeur de type ~'a
+    located~. Par exemple, le non-terminal ~located(expression)~ produit une
+    valeur de type ~'a located~.
+*** Questions diverses
+    J'apporte quelques précisions à l'énoncé du jalon 1.
+** Introduction à la théorie des langages de programmation
+   Voir la première partie des
+   [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
+   dédiés. La substitution (derniers transparents) sera traitée à la prochaine
+   séance.
