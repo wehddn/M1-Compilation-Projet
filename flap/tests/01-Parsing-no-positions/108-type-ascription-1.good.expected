@@ -1,2 +1,1 @@
-Error (parsing)
-  Syntax error.
+let main = match (you) { | (me : int) -> me }

@@ -1,1 +1,1 @@
-let main = (nothing 0); while (True) do { nothing 0 }
+let main = (nothing 0); while (True) { nothing 0 }

@@ -192,3 +192,17 @@
    [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
    dédiés. La substitution (derniers transparents) sera traitée à la prochaine
    séance.
+* Cours 05 <2022-10-10>
+** Suivi du projet
+*** À propos des erreurs
+    Les erreurs doivent de syntaxe doivent être levées via la fonction
+    ~Error.error~, à laquelle il faut passer une position valide.
+*** À propos des positions
+    Les positions générées dans les messages d'erreur peuvent dépendre de
+    détails de la structure de votre grammaire. Il n'est donc pas gênant que
+    vous n'ayez pas exactement les mêmes messages que ceux présents dans les
+    tests fournis avec le jalon.
+** Introduction à la théorie des langages de programmation
+   Voir la deuxième partie des
+   [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
+   dédiés. On a traité la substitution de la première partie.

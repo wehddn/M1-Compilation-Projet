@@ -1,4 +1,4 @@
 let mono =
-  switch (p) {
+  match (p) {
   | (x, y) -> x + y
   }

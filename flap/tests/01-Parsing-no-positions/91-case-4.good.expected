@@ -1,2 +1,4 @@
-Error (parsing)
-  Syntax error.
+let nest =
+  match (bird) {
+  | Nest(Some(bird)) -> bird | Nest(None) -> nothing
+  }

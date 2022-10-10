@@ -1,2 +1,2 @@
 let polybox =
-  switch (x) { { box = y }<int> -> y }
+  match (x) { { box = y }<int> -> y }
