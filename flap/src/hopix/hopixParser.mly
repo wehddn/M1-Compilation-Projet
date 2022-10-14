@@ -9,10 +9,10 @@
 COLON BAR LPAREN RPAREN LET FUN AND MATCH IF THEN ELSE REF WHILE DO UNTIL FOR FROM TO LCBRACKET RCBRACKET 
 LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AMPERSAND ASSIGN
 
-%token <string> ID TYPE_VARIABLE CONSTR_ID STRING CHAR 
+%token <string> ID TYPE_VARIABLE CONSTR_ID STRING CHAR BINOP
 %token <Mint.t> INT
 
-%left ARROW BAR COMMA AMPERSAND STAR SEMICOLON DOT REF ASSIGN EXCLAMATION
+%left ARROW BAR COMMA AMPERSAND STAR SEMICOLON DOT REF ASSIGN EXCLAMATION BINOP
 
 %start<HopixAST.t> program
 
@@ -64,7 +64,7 @@ tdefinition_label: id=located(id) COLON t=located(ty)           {(id, t)}
 id: i=ID {LId(i)}
 
 ty:
-  (*| tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}*)
+  // shift reduce| tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}
   | t1=located(ty) ARROW t2=located(ty) {TyArrow(t1,t2)}
   | t1=located(ty) STAR t2=located(ty) {TyTuple(t1::[t2])}
   | t=tid {TyVar(t)}
@@ -76,23 +76,27 @@ expr:
   | cid=located(cid) tyl=tyList expl=loption(delimited(LPAREN, separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tagged(cid,tyl,expl)}
   | tupl=loption(delimited(LPAREN,separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tuple(tupl)}
   // warning shift reduce
-//| LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? RCBRACKET {Record(idp,ty)}
+ // | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? RCBRACKET {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
   | exp1 = located(expr) SEMICOLON exp2 = located(expr) {Sequence(exp1::[exp2])}
   //warning shift reduce
 //| vdef = vdefinition SEMICOLON exp = located(expr) {Define(vdef,exp)}
   | BACKSLASH p = located(pattern) ARROW exp = located(expr) {Fun(FunctionDefinition(p,exp))}
   //cyclic
-//| exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
-  // TODO : Application infixe
-  //| exp1 = located(expr) STAR exp2 = located(expr) {}
+  //| exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
+  // A VOIR
+ | exp1 = located(expr) b=BINOP exp2 = located(expr) {
+    let binop = Position.with_poss $startpos $endpos(Id(b)) in
+    let id = Position.with_poss $startpos $endpos(Variable(binop,None)) in 
+    let apply = Position.with_poss $startpos $endpos(Apply(id, exp1)) in
+    Apply(apply,  exp2)
+  }
   | MATCH LPAREN exp1 = located(expr) RPAREN LCBRACKET br = branches RCBRACKET {Case(exp1,br)}
   | IF LPAREN exp1 = located(expr) RPAREN THEN LCBRACKET exp2 = located(expr) RCBRACKET exp3 = located(els) {IfThenElse(exp1,exp2,exp3)}
   | REF exp = located(expr) {Ref(exp)}
   | exp1 = located(expr) ASSIGN exp2 = located(expr) {Assign(exp1,exp2)}
   | EXCLAMATION exp = located(expr) {Read(exp)}
   | WHILE LPAREN exp1 = located(expr) RPAREN LCBRACKET exp2 = located(expr) RCBRACKET {While(exp1,exp2)}
-  // pas sûr mais on fait comme ça pour l'instant
   | DO LCBRACKET exp1 = located(expr) RCBRACKET UNTIL LPAREN exp2 = located(expr) RPAREN {While(exp2,exp1)}
   | FOR vid = located(varid) FROM LPAREN exp1 = located(expr) RPAREN TO LPAREN exp2 = located(expr) RPAREN LCBRACKET exp3 = located(expr) RCBRACKET {For(vid,exp1,exp2,exp3)}
   | LPAREN exp = located(expr) COLON ty = located(ty) RPAREN {TypeAnnotation(exp,ty)}

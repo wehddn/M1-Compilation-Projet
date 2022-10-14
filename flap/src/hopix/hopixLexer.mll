@@ -29,7 +29,7 @@ let int           = '-'?['0'-'9']+|'0''x'['0'-'9''a'-'f''A'-'F']+|'0''b'['0'-'1'
 let atom          = ('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])|['\\''\'''n''t''b''r']))|([' '-'~']#['''])
 let char          = [''']atom[''']
 let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])|['\\''\'''n''t''b''r']))|([' '-'~']#['"'])*)'"'
-
+let binop = "+" | "-" | "*" | "/" | "&&" | "||" | "=?" | "<=?" | ">=?" | "<?" | ">?"
 
 rule token = parse
   (** Layout *)
@@ -60,6 +60,7 @@ rule token = parse
   | string as s           { STRING s      }
   | char as c             { CHAR c        }
   | int as i              { INT (Mint.of_string i) }
+  | binop as b            { BINOP b       }
   | '<'                   { LESS          }
   | '>'                   { GREATER       }
   | '='                   { EQUAL         }
@@ -79,8 +80,32 @@ rule token = parse
   | '*'                   { STAR          }
   | '_'                   { UNDERSCORE    }
   | '&'                   { AMPERSAND     }
+(*
+and comment level = parse
+  | "*}" {
+    if level = 1 then
+      token lexbuf
+    else
+      comment (pred level) lexbuf
+  }
+  | "{*" {
+    comment (succ level) lexbuf
+  }
+  | eof {
+    error lexbuf "unterminated comment."
+  }
+  | newline {
+    next_line_and (comment level) lexbuf
+  }
+  | _ {
+    comment level lexbuf
+  }
 
-  
+and commentline = parse
+  | newline { next_line_and token lexbuf }
+  | eof { EOF }
+  | _ { commentline lexbuf }
+*)
 
   (** Lexing error. *)
   | _               { error lexbuf "unexpected character." }
