@@ -12,7 +12,16 @@ LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AM
 %token <string> ID TYPE_VARIABLE CONSTR_ID STRING CHAR 
 %token <Mint.t> INT
 
-%left ARROW BAR COMMA AMPERSAND STAR SEMICOLON DOT REF ASSIGN EXCLAMATION
+%left BAR
+%left COMMA
+%left AMPERSAND
+%left STAR
+%left DOT
+%left REF
+%left ASSIGN
+%left EXCLAMATION
+%nonassoc ARROW
+%right SEMICOLON
 
 %start<HopixAST.t> program
 
@@ -20,6 +29,11 @@ LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AM
 
 program:
   | p=located(definition)* EOF                 {p}
+  | error 
+  {
+    let pos = Position.lex_join $startpos $endpos in
+    Error.error "parsing" pos "Syntax error."
+  }
 
 definition:
   | TYPE tc=located(tcon) df=definition_variables dt=definition_tdefinition  {DefineType(tc,df,dt)}
@@ -64,7 +78,7 @@ tdefinition_label: id=located(id) COLON t=located(ty)           {(id, t)}
 id: i=ID {LId(i)}
 
 ty:
-  (*| tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}*)
+//  | tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}
   | t1=located(ty) ARROW t2=located(ty) {TyArrow(t1,t2)}
   | t1=located(ty) STAR t2=located(ty) {TyTuple(t1::[t2])}
   | t=tid {TyVar(t)}
@@ -79,7 +93,7 @@ expr:
 //| LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? RCBRACKET {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
   | exp1 = located(expr) SEMICOLON exp2 = located(expr) {Sequence(exp1::[exp2])}
-  //warning shift reduce
+  //warning shift reduce avec definition
 //| vdef = vdefinition SEMICOLON exp = located(expr) {Define(vdef,exp)}
   | BACKSLASH p = located(pattern) ARROW exp = located(expr) {Fun(FunctionDefinition(p,exp))}
   //cyclic
@@ -100,6 +114,7 @@ expr:
 els:
 | {Tuple([])}
 | ELSE LCBRACKET exp = expr RCBRACKET {exp}
+
 branches:
   | b=  located(branch) {[b]}
   | bl = preceded(BAR,located(branch))* {bl}
@@ -109,7 +124,7 @@ branch:
 
 
 tyList:
-  | l=loption(delimited(LESS,separated_nonempty_list(COMMA,located(ty)),GREATER))  {Some l}
+  | l=delimited(LESS,separated_nonempty_list(COMMA,located(ty)),GREATER))?  {l}
 
 literal:
   | i=INT {LInt(i)}
@@ -132,8 +147,6 @@ pattern:
 pattern_label: LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(pattern))) RCBRACKET {idp}
 
 pattern_tuple: p=delimited(LPAREN, separated_nonempty_list(COMMA, located(pattern)), RPAREN) {p}
-
-pattern_tcon: t=located(cid) ty=pattern_ty p=loption(pattern_tuple) {PTaggedValue(t,ty,p)}
 
 pattern_ty: ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? {ty}
 
