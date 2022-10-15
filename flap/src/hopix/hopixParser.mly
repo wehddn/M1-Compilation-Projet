@@ -62,7 +62,7 @@ definition_tdefinition:
 
 tdefinition: 
   | ci=located(cid) ct=tdefinition_types ctl=tdefinition_constr*      {DefineSumType((ci,ct)::ctl)}
-  | ctl=tdefinition_constr*                                           {DefineSumType(ctl)}
+  | ctl=tdefinition_constr+                                           {DefineSumType(ctl)}
   | tll=delimited(LCBRACKET, separated_list(COMMA, tdefinition_label), RCBRACKET)  {DefineRecordType(tll)}
 
 cid: i=CONSTR_ID {KId(i)}
