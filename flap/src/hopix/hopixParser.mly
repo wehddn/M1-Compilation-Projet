@@ -102,7 +102,8 @@ expr:
   | exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
   // A VOIR
   | exp1 = located(expr) b=BINOP exp2 = located(expr) {
-    let binop = Position.with_poss $startpos $endpos(Id(b)) in
+    let op = "`" ^ b ^ "`" in
+    let binop = Position.with_poss $startpos $endpos(Id(op)) in
     let id = Position.with_poss $startpos $endpos(Variable(binop,None)) in 
     let apply = Position.with_poss $startpos $endpos(Apply(id, exp1)) in
     Apply(apply,  exp2)
