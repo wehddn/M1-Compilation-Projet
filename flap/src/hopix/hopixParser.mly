@@ -22,6 +22,7 @@ LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AM
 %left EXCLAMATION
 %nonassoc ARROW
 %right SEMICOLON
+%left BINOP
 
 %start<HopixAST.t> program
 
@@ -60,7 +61,7 @@ definition_tdefinition:
   | EQUAL t=tdefinition   {t}
 
 tdefinition: 
-  | ci=located(cid) ct=tdefinition_types                              {DefineSumType([(ci,ct)])}
+  | ci=located(cid) ct=tdefinition_types ctl=tdefinition_constr*      {DefineSumType((ci,ct)::ctl)}
   | ctl=tdefinition_constr*                                           {DefineSumType(ctl)}
   | tll=delimited(LCBRACKET, separated_list(COMMA, tdefinition_label), RCBRACKET)  {DefineRecordType(tll)}
 
@@ -78,7 +79,7 @@ tdefinition_label: id=located(id) COLON t=located(ty)           {(id, t)}
 id: i=ID {LId(i)}
 
 ty:
-//  | tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}
+  | tc=tcon ty=loption(delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)) {TyCon(tc, ty)}
   | t1=located(ty) ARROW t2=located(ty) {TyArrow(t1,t2)}
   | t1=located(ty) STAR t2=located(ty) {TyTuple(t1::[t2])}
   | t=tid {TyVar(t)}
@@ -88,18 +89,19 @@ expr:
   | l=located(literal)  {Literal(l)}
   | vid=located(varid) tyl=tyList {Variable(vid,tyl)}
   | cid=located(cid) tyl=tyList expl=loption(delimited(LPAREN, separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tagged(cid,tyl,expl)}
-  | tupl=loption(delimited(LPAREN,separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tuple(tupl)}
+  | tupl=delimited(LPAREN, expr_tuple, RPAREN) {Tuple(tupl)}
+  | LPAREN e=located(expr) RPAREN {Tuple([e])}
   // warning shift reduce
- // | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? RCBRACKET {Record(idp,ty)}
+  | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) RCBRACKET ty=delimited(LESS, separated_list(COMMA, located(ty)), GREATER)? {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
   | exp1 = located(expr) SEMICOLON exp2 = located(expr) {Sequence(exp1::[exp2])}
   //warning shift reduce avec definition
-//| vdef = vdefinition SEMICOLON exp = located(expr) {Define(vdef,exp)}
+  | vdef = vdefinition SEMICOLON exp = located(expr) {Define(vdef,exp)}
   | BACKSLASH p = located(pattern) ARROW exp = located(expr) {Fun(FunctionDefinition(p,exp))}
   //cyclic
-  //| exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
+  | exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
   // A VOIR
- | exp1 = located(expr) b=BINOP exp2 = located(expr) {
+  | exp1 = located(expr) b=BINOP exp2 = located(expr) {
     let binop = Position.with_poss $startpos $endpos(Id(b)) in
     let id = Position.with_poss $startpos $endpos(Variable(binop,None)) in 
     let apply = Position.with_poss $startpos $endpos(Apply(id, exp1)) in
@@ -115,6 +117,9 @@ expr:
   | FOR vid = located(varid) FROM LPAREN exp1 = located(expr) RPAREN TO LPAREN exp2 = located(expr) RPAREN LCBRACKET exp3 = located(expr) RCBRACKET {For(vid,exp1,exp2,exp3)}
   | LPAREN exp = located(expr) COLON ty = located(ty) RPAREN {TypeAnnotation(exp,ty)}
 
+
+expr_tuple: exp1=located(expr) COMMA exp2=located(expr) {exp1::[exp2]}
+
 els:
 | {Tuple([])}
 | ELSE LCBRACKET exp = expr RCBRACKET {exp}
@@ -128,7 +133,7 @@ branch:
 
 
 tyList:
-  | l=delimited(LESS,separated_nonempty_list(COMMA,located(ty)),GREATER))?  {l}
+  | l=delimited(LESS,separated_list(COMMA,located(ty)),GREATER)?  {l}
 
 literal:
   | i=INT {LInt(i)}
