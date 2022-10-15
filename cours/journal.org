@@ -192,3 +192,101 @@
    [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
    dédiés. La substitution (derniers transparents) sera traitée à la prochaine
    séance.
+* Cours 05 <2022-10-10>
+** Suivi du projet
+*** À propos des erreurs
+    Les erreurs doivent de syntaxe doivent être levées via la fonction
+    ~Error.error~, à laquelle il faut passer une position valide.
+*** À propos des positions
+    Les positions générées dans les messages d'erreur peuvent dépendre de
+    détails de la structure de votre grammaire. Il n'est donc pas gênant que
+    vous n'ayez pas exactement les mêmes messages que ceux présents dans les
+    tests fournis avec le jalon.
+** Les réponses aux exercices de code du cours 4
+   #+BEGIN_SRC ocaml
+     let rec free_vars =
+       let open IdSet in
+       function
+       | EInt i -> empty
+
+       | EVar x -> singleton x
+
+       | EPlus (m, n) | EMult (m, n) -> union (free_vars m) (free_vars n)
+
+       | ESum (x, start, stop, body) ->
+          union (union (free_vars start) (free_vars stop))
+            (diff (free_vars body) (singleton x))
+     ;;
+
+     let fresh_in : IdSet.t -> id =
+       fun s ->
+       let rec loop i =
+         let x = "x" ^ string_of_int i in
+         if IdSet.mem x s then loop (i + 1) else x
+       in
+       loop 0
+     ;;
+
+     let rec rename : e -> id -> id -> e =
+       fun m y x ->
+       match m with
+       | EInt _ -> m
+
+       | EVar z -> if z = x then EVar y else m
+
+       | EPlus (m, n) ->
+          EPlus (rename m y x, rename m y x)
+
+       | EMult (m, n) ->
+          EMult (rename m y x, rename n y x)
+
+       | ESum (z, start, stop, body) ->
+          let start = rename start y x in
+          let stop = rename stop y x in
+          if z = x then ESum (z, start, stop, body)
+          else
+            let k = fresh_in IdSet.(union (free_vars body) (singleton y)) in
+            ESum (k, start, stop, rename (rename stop k z) y x
+     ;;
+
+     let rec alpha_eq : e -> e -> bool =
+       fun m n ->
+       match m, n with
+       | EInt _, EInt _ | EVar _, EVar _ ->
+          m = n
+
+       | EPlus (m, n), EPlus (m', n') | EMult (m, n), EMult (m', n') ->
+          alpha_eq m m' && alpha_eq n n'
+
+       | ESum (x, start, stop, body), ESum (x', start', stop', body') ->
+          alpha_eq start start' && alpha_eq stop stop'
+          && let y = fresh_in (IdSet.union (free_vars body) (free_vars body')) in
+             alpha_eq (rename body y x) (rename body' y x')
+     ;;
+
+     let subst : e -> id -> e -> e =
+       fun n m x ->
+       match n with
+       | EInt _ -> n
+
+       | EVar z -> if z = x then m else EVar z
+
+       | EPlus (n1, n2) ->
+          EPlus (subst n1 m x, subst n2 m x)
+
+       | EMult (n1, n2) ->
+          EMult (subst n1 m x, subst n2 m x)
+
+       | ESum (z, start, stop, body) ->
+          let start = subst start m x in
+          let stop = subst stop m x in
+          if z = x then ESum (z, start, stop, body)
+          else
+            let k = fresh_in IdSet.(union (free_vars body) (free_vars m)) in
+            ESum (k, start, stop, subst (rename stop k z) m x
+     ;;
+   #+END_SRC
+** Introduction à la théorie des langages de programmation
+   Voir la deuxième partie des
+   [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
+   dédiés. On a traité la substitution de la première partie.

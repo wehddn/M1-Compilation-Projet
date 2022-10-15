@@ -24,7 +24,7 @@ module IdSet = Set.Make(Id)
    la fonction [interpret] du cours 01, à ceci près que la fonction ci-dessous
    travaille sur des environnements de type [int Env.t]. *)
 let rec eval env m =
-  match e with
+  match m with
   | EInt i -> i
 
   | EVar x -> Env.find x env
@@ -44,7 +44,7 @@ let rec eval env m =
      iter vstart 0
 ;;
 
-let free_vars : e -> IdSet.t =
+let rec free_vars : e -> IdSet.t =
   assert false
 ;;
 

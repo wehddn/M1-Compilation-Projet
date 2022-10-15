@@ -1,2 +1,2 @@
-Line 2, characters 15-16: Error (parsing)
-  Syntax error.
+let main =
+  while (True) { while (((! x) >? 0)) { x := ((! x) - 1) } }

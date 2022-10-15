@@ -1,2 +1,1 @@
-Error (parsing)
-  Syntax error.
+let what_is_in_the_box = match (box) { | {box = box}  -> box }

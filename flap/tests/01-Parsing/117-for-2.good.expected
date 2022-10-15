@@ -1,2 +1,1 @@
-Line 2, characters 8-10: Error (parsing)
-  Syntax error.
+let main = for x from (0 to 100) { y := ((x * 2) + (! y)) }

@@ -263,14 +263,14 @@ and expression = function
     group (parens (string "!" ++ located may_paren_expression e))
 
   | While (e, b) ->
-    nest 2 (group (string "while" ++ parens (located expression e) ++
-                   string "do" ++ braces' (located expression b)))
+    nest 2 (group (string "while" ++ parens (located expression e)
+                   ++ braces' (located expression b)))
 
   | For (x, start, stop, e) ->
      nest 2 (group (
                  string "for"
                  ++ located identifier x
-                 ++ string "in"
+                 ++ string "from"
                  ++ parens (located expression start
                  ++ string "to"
                  ++ (located expression stop))
