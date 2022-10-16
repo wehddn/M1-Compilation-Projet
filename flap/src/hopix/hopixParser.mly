@@ -119,7 +119,7 @@ expr:
   | LPAREN exp = located(expr) COLON ty = located(ty) RPAREN {TypeAnnotation(exp,ty)}
 
 
-expr_tuple: exp1=located(expr) COMMA exp2=located(expr) {exp1::[exp2]}
+expr_tuple: e=separated_list(COMMA, located(expr)) {e}
 
 els:
 | {Tuple([])}
@@ -148,15 +148,16 @@ pattern:
   | vi=located(varid)  {PVariable(vi)}
   | UNDERSCORE {PWildcard}
   | p=pattern_tuple {PTuple(p)}
-  | p=located(pattern) COMMA t=located(ty) {PTypeAnnotation(p,t)}
+  | p=located(pattern) COLON t=located(ty) {PTypeAnnotation(p,t)}
   | l=located(literal) {PLiteral(l)}
+  | c=located(cid) ty=pattern_ty p=loption(delimited(LPAREN, separated_list(COMMA, located(pattern)), RPAREN)) {PTaggedValue(c,ty,p)}
   | pl=pattern_label ty=pattern_ty {PRecord(pl,ty)}
   | p1=located(pattern) BAR p2=located(pattern) {POr(p1::[p2])}
   | p1=located(pattern) AMPERSAND p2=located(pattern) {PAnd(p1::[p2])}
 
 pattern_label: LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(pattern))) RCBRACKET {idp}
 
-pattern_tuple: p=delimited(LPAREN, separated_nonempty_list(COMMA, located(pattern)), RPAREN) {p}
+pattern_tuple: LPAREN p=separated_list(COMMA, located(pattern)) RPAREN {p}
 
 pattern_ty: ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREATER)? {ty}
 
