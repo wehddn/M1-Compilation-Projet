@@ -34,6 +34,8 @@ let char          = [''']atom[''']
 let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
                       |['\\''\'''n''t''b''r']))
                       |([' '-'~']#['"'])*)'"'
+(* Récupérer de Hobix *)
+let infix_alien_identifier = "`" (['A'-'Z''a'-'z'] | [ '+' '-' '*' '/' '<' '=' '>' '?' '&' ] | digit)+ "`"
 
 let binop = "+" | "-" | "*" | "/" | "&&" | "||" | "=?" | "<=?" | ">=?" | "<?" | ">?"
 
@@ -66,7 +68,7 @@ rule token = parse
   | type_variable as tv   { TYPE_VARIABLE tv }
   | constr_id as ci       { CONSTR_ID ci  }
   | int as i              { INT (Mint.of_string i) }
-  | binop as b            { BINOP b       }
+  | infix_alien_identifier as i { INFIXID i}
   | '<'                   { LESS          }
   | '>'                   { GREATER       }
   | '='                   { EQUAL         }
@@ -84,6 +86,16 @@ rule token = parse
   | '!'                   { EXCLAMATION   }
   | ';'                   { SEMICOLON     }
   | '*'                   { STAR          }
+  | '+'                   { PLUS          }
+  | '-'                   { MINUS         }
+  | '/'                   { SLASH         }
+  | "&&"                  { LAND          }
+  | "||"                  { LOR           }
+  | "=?"                  { EQ            }
+  | "<=?"                 { LTE           }
+  | ">=?"                 { GTE           }
+  | "<?"                  { LT            }
+  | ">?"                  { GT            }
   | '_'                   { UNDERSCORE    }
   | '&'                   { AMPERSAND     }
   | string as s           
