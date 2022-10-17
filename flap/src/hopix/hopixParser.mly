@@ -14,14 +14,13 @@ LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AM
 %token <Mint.t> INT
 
 %left BAR
-%left COMMA
 %left AMPERSAND
 %left STAR
 %left DOT
 %left REF
 %left ASSIGN
 %left EXCLAMATION
-%nonassoc ARROW
+%right ARROW
 %right SEMICOLON
 %left BINOP
 
@@ -91,7 +90,7 @@ expr:
   | vid=located(varid) tyl=tyList {Variable(vid,tyl)}
   | cid=located(cid) tyl=tyList expl=loption(delimited(LPAREN, separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tagged(cid,tyl,expl)}
   | tupl=delimited(LPAREN, expr_tuple, RPAREN) {Tuple(tupl)}
-  | LPAREN e=located(expr) RPAREN {Tuple([e])}
+  | LPAREN e=expr RPAREN {e}
   // warning shift reduce
   | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) RCBRACKET ty=delimited(LESS, separated_list(COMMA, located(ty)), GREATER)? {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
@@ -146,6 +145,7 @@ type_scheme:
   | tsv=loption(delimited(LSBRACKET, located(tid)+, RSBRACKET)) ty=located(ty)  {ForallTy(tsv,ty)}
 
 pattern:
+  | LPAREN p=pattern RPAREN {p}
   | vi=located(varid)  {PVariable(vi)}
   | UNDERSCORE {PWildcard}
   | p=pattern_tuple {PTuple(p)}
