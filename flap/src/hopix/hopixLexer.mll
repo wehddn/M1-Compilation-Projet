@@ -33,7 +33,7 @@ let atom          = ('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''
 let char          = [''']atom[''']
 let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
                       |['\\''\'''n''t''b''r']))
-                      |([' '-'~']#['"'])*)'"'
+                      |([' '-'~']#['"']|(['\\']['\"']))*)'"'
 (* Récupérer de Hobix *)
 let infix_alien_identifier = "`" (['A'-'Z''a'-'z'] | [ '+' '-' '*' '/' '<' '=' '>' '?' '&' ] | digit)+ "`"
 
@@ -104,13 +104,6 @@ rule token = parse
        if i < 0 then l else exp (i - 1) (s.[i] :: l) in
       exp (String.length s - 1) [] in
 
-    let implode l =
-      let res = String.create (List.length l) in
-      let rec imp i = function
-       | [] -> res
-       | c :: l -> res.[i] <- c; imp (i + 1) l in
-      imp 0 l in
-      
     let rec do_all lst =
       match lst with
       | [] -> []
@@ -121,6 +114,8 @@ rule token = parse
                             | 't' -> '\t'
                             | 'b' -> '\b'
                             | 'r' -> '\r'
+                            | '0' -> 's'
+                            | _ -> ' '
                             in x_res :: (do_all xs)
       | x :: xs -> x :: (do_all xs) in
 
@@ -128,6 +123,7 @@ rule token = parse
     let char_list = explode res in
     let char_res = do_all char_list in
     let str_res = String.concat "" (List.map (String.make 1) char_res) in
+
     STRING str_res      
   }
 
