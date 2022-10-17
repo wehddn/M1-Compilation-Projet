@@ -290,3 +290,11 @@
    Voir la deuxième partie des
    [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
    dédiés. On a traité la substitution de la première partie.
+* Cours 6 <2022-10-17>
+** Introduction au jalon 2
+   On discute en détail l'énoncé du deuxième jalon, qui consiste en l'écriture
+   d'un inteprète pour Hopix.
+** Introduction à la théorie des langages de programmation
+   Voir la troisième et dernière partie des
+   [[file:cours-04-à-06/cours-04-à-06-intro-semantique-typage.pdf][transparents]]
+   dédiés.

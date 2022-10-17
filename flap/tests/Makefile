@@ -1,6 +1,8 @@
 FLAP?=../_build/default/src/flap.exe
 JALONS=\
-	01-Parsing.results
+	01-Parsing.results \
+	01-Parsing-no-positions.results \
+	02-Interpreter.results
 EXTS=parsing.hopix parsing-no-positions.hopix eval.hopix typing.hopix \
 	hobix fopix retrolix
 
