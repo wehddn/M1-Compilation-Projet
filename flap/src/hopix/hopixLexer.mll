@@ -41,6 +41,8 @@ rule token = parse
   (** Layout *)
   | newline               { next_line_and token lexbuf }
   | blank+                { token lexbuf               }
+  | "{*"                  { comment 1 lexbuf           }
+  | "**"                  { commentline lexbuf         }
   | eof                   { EOF           }
   | "type"                { TYPE          }
   | "extern"              { EXTERN        }
@@ -85,8 +87,36 @@ rule token = parse
   | '_'                   { UNDERSCORE    }
   | '&'                   { AMPERSAND     }
   | string as s           
-  { let res = String.sub s 1 ((String.length s)-2) in
-    STRING s      
+  { let explode s =
+      let rec exp i l =
+       if i < 0 then l else exp (i - 1) (s.[i] :: l) in
+      exp (String.length s - 1) [] in
+
+    let implode l =
+      let res = String.create (List.length l) in
+      let rec imp i = function
+       | [] -> res
+       | c :: l -> res.[i] <- c; imp (i + 1) l in
+      imp 0 l in
+      
+    let rec do_all lst =
+      match lst with
+      | [] -> []
+      | '\\' :: x :: xs -> let x_res = match x with 
+                            | '\\' -> '\\'
+                            | '\'' -> '\''
+                            | 'n' -> '\n'
+                            | 't' -> '\t'
+                            | 'b' -> '\b'
+                            | 'r' -> '\r'
+                            in x_res :: (do_all xs)
+      | x :: xs -> x :: (do_all xs) in
+
+    let res = String.sub s 1 ((String.length s)-2) in
+    let char_list = explode res in
+    let char_res = do_all char_list in
+    let str_res = String.concat "" (List.map (String.make 1) char_res) in
+    STRING str_res      
   }
 
   | char as c             
@@ -107,7 +137,10 @@ rule token = parse
     CHAR res      
   }
 
-(*
+  (** Lexing error. *)
+  | _               { error lexbuf "unexpected character." }
+
+
 and comment level = parse
   | "*}" {
     if level = 1 then
@@ -132,8 +165,3 @@ and commentline = parse
   | newline { next_line_and token lexbuf }
   | eof { EOF }
   | _ { commentline lexbuf }
-*)
-
-  (** Lexing error. *)
-  | _               { error lexbuf "unexpected character." }
-
