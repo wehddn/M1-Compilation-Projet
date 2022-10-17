@@ -8,21 +8,29 @@
 %token EOF TYPE LESS GREATER EQUAL COMMA EXTERN 
 COLON BAR LPAREN RPAREN LET FUN AND MATCH IF THEN ELSE REF WHILE DO UNTIL FOR FROM TO LCBRACKET RCBRACKET 
 LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AMPERSAND ASSIGN
+PLUS MINUS SLASH LAND LOR EQ LTE GTE GT LT 
 
-%token <string> ID TYPE_VARIABLE CONSTR_ID STRING BINOP
+%token <string> ID TYPE_VARIABLE CONSTR_ID STRING INFIXID
 %token <char> CHAR
 %token <Mint.t> INT
 
+
+%nonassoc FUN AND ELSE
+%nonassoc EQUAL
 %left BAR
 %left AMPERSAND
-%left STAR
 %left DOT
 %left REF
 %left ASSIGN
 %left EXCLAMATION
 %right ARROW
+%left LOR
+%left LAND
+%nonassoc LTE LT GT GTE EQ
+%left INFIXID
+%left PLUS MINUS
+%left STAR SLASH
 %right SEMICOLON
-%left BINOP
 
 %start<HopixAST.t> program
 
@@ -95,16 +103,12 @@ expr:
   | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) RCBRACKET ty=delimited(LESS, separated_list(COMMA, located(ty)), GREATER)? {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
   | exp1 = located(expr) SEMICOLON exp2 = located(expr) {Sequence(exp1::[exp2])}
-  //warning shift reduce avec definition
   | vdef = vdefinition SEMICOLON exp = located(expr) {Define(vdef,exp)}
   | BACKSLASH p = located(pattern) ARROW exp = located(expr) {Fun(FunctionDefinition(p,exp))}
-  //cyclic
   | exp1 = located(expr) exp2 = located(expr) {Apply(exp1,exp2)}
-  // A VOIR
-  | exp1 = located(expr) b=BINOP exp2 = located(expr) {
-    let op = "`" ^ b ^ "`" in
-    let binop = Position.with_poss $startpos $endpos(Id(op)) in
-    let id = Position.with_poss $startpos $endpos(Variable(binop,None)) in 
+  | exp1 = located(expr) b=binop exp2 = located(expr) {
+    let bin = Position.with_poss $startpos $endpos(Id(b)) in
+    let id = Position.with_poss $startpos $endpos(Variable(bin,None)) in 
     let apply = Position.with_poss $startpos $endpos(Apply(id, exp1)) in
     Apply(apply,  exp2)
   }
@@ -165,3 +169,17 @@ pattern_ty: ty=delimited(LESS, separated_nonempty_list(COMMA, located(ty)), GREA
 %inline located(X): x=X {
   Position.with_poss $startpos $endpos x
 }
+
+%inline binop:
+  x=INFIXID { String.(sub x 0 (length x - 1)) }
+| PLUS  { "`+`"  }
+| MINUS { "`-`"  }
+| STAR  { "`*`"  }
+| SLASH { "`/`"  }
+| GT    { "`>?`"  }
+| GTE   { "`>=?`" }
+| LT    { "`<?`"  }
+| LTE   { "`<=?`" }
+| EQ    { "`=?`"  }
+| LAND  { "`&&`" }
+| LOR   { "`||`" }
