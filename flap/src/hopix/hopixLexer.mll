@@ -34,6 +34,9 @@ let char          = [''']atom[''']
 let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
                       |['\\''\'''n''t''b''r']))
                       |([' '-'~']#['"']|(['\\']['\"']))*)'"'
+let bad_string    = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
+                      |['\\''\'''n''t''b''r']))
+                      |([' '-'~']#['"']|(['\\']['\"']))*)
 (* Récupérer de Hobix *)
 let infix_alien_identifier = "`" (['A'-'Z''a'-'z'] | [ '+' '-' '*' '/' '<' '=' '>' '?' '&' ] | digit)+ "`"
 
@@ -98,6 +101,7 @@ rule token = parse
   | ">?"                  { GT            }
   | '_'                   { UNDERSCORE    }
   | '&'                   { AMPERSAND     }
+  | bad_string            { error lexbuf "Unterminated string." }
   | string as s           
   { let explode s =
       let rec exp i l =
