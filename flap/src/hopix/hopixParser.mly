@@ -21,8 +21,6 @@ PLUS MINUS SLASH LAND LOR EQ LTE GTE GT LT
 %left AMPERSAND
 %left DOT
 %left REF
-%left ASSIGN
-%left EXCLAMATION
 %right ARROW
 %left LOR
 %left LAND
@@ -30,6 +28,7 @@ PLUS MINUS SLASH LAND LOR EQ LTE GTE GT LT
 %left INFIXID
 %left PLUS MINUS
 %left STAR SLASH
+%left EXCLAMATION
 %right SEMICOLON
 
 %start<HopixAST.t> program
@@ -99,7 +98,6 @@ expr:
   | cid=located(cid) tyl=tyList expl=loption(delimited(LPAREN, separated_nonempty_list(COMMA,located(expr)), RPAREN)) {Tagged(cid,tyl,expl)}
   | tupl=delimited(LPAREN, expr_tuple, RPAREN) {Tuple(tupl)}
   | LPAREN e=expr RPAREN {e}
-  // warning shift reduce
   | LCBRACKET idp=separated_nonempty_list(COMMA, separated_pair(located(id), EQUAL, located(expr))) RCBRACKET ty=delimited(LESS, separated_list(COMMA, located(ty)), GREATER)? {Record(idp,ty)}
   | exp1 = located(expr) DOT lid = located(id) {Field(exp1,lid)}
   | exp1 = located(expr) SEMICOLON exp2 = located(expr) {Sequence(exp1::[exp2])}
