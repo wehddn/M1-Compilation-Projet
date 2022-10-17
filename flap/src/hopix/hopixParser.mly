@@ -116,7 +116,9 @@ expr:
   | exp1 = located(expr) ASSIGN exp2 = located(expr) {Assign(exp1,exp2)}
   | EXCLAMATION exp = located(expr) {Read(exp)}
   | WHILE LPAREN exp1 = located(expr) RPAREN LCBRACKET exp2 = located(expr) RCBRACKET {While(exp1,exp2)}
-  | DO LCBRACKET exp1 = located(expr) RCBRACKET UNTIL LPAREN exp2 = located(expr) RPAREN {While(exp2,exp1)}
+  | DO LCBRACKET exp1 = located(expr) RCBRACKET UNTIL LPAREN exp2 = located(expr) RPAREN { 
+    let whi = Position.with_poss $startpos $endpos(While(exp2,exp1)) in
+    Sequence(exp1::[whi])}
   | FOR vid = located(varid) FROM LPAREN exp1 = located(expr) RPAREN TO LPAREN exp2 = located(expr) RPAREN LCBRACKET exp3 = located(expr) RCBRACKET {For(vid,exp1,exp2,exp3)}
   | LPAREN exp = located(expr) COLON ty = located(ty) RPAREN {TypeAnnotation(exp,ty)}
 
