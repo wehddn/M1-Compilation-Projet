@@ -9,7 +9,8 @@
 COLON BAR LPAREN RPAREN LET FUN AND MATCH IF THEN ELSE REF WHILE DO UNTIL FOR FROM TO LCBRACKET RCBRACKET 
 LSBRACKET RSBRACKET DOT BACKSLASH EXCLAMATION SEMICOLON ARROW STAR UNDERSCORE AMPERSAND ASSIGN
 
-%token <string> ID TYPE_VARIABLE CONSTR_ID STRING CHAR BINOP
+%token <string> ID TYPE_VARIABLE CONSTR_ID STRING BINOP
+%token <char> CHAR
 %token <Mint.t> INT
 
 %left BAR
@@ -139,7 +140,7 @@ tyList:
 literal:
   | i=INT {LInt(i)}
   | s=STRING {LString(s)}
-  | c=CHAR {LChar(c.[0])}
+  | c=CHAR {LChar(c)}
 
 type_scheme:
   | tsv=loption(delimited(LSBRACKET, located(tid)+, RSBRACKET)) ty=located(ty)  {ForallTy(tsv,ty)}

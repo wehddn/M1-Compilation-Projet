@@ -28,7 +28,7 @@ let type_variable = '`'['a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 let int           = '-'?['0'-'9']+|'0''x'['0'-'9''a'-'f''A'-'F']+|'0''b'['0'-'1']+|'0''o'['0'-'7']+
 let atom          = ('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
                       |['\\''\'''n''t''b''r']
-                      |(('0''x')?['0'-'9''a'-'f''A'-'F']['0'-'9''a'-'f''A'-'F'])))
+                      |(['0']['x']?['0'-'9''a'-'f''A'-'F']['0'-'9''a'-'f''A'-'F'])))
                       |([' '-'~']#['''])
 let char          = [''']atom[''']
 let string        = '"'(('\\'((['0''1']['0'-'9']['0'-'9']|'2'['0'-'4']['0'-'9']|'2''5'['0'-'5'])
@@ -63,8 +63,6 @@ rule token = parse
   | id as id              { ID id         }
   | type_variable as tv   { TYPE_VARIABLE tv }
   | constr_id as ci       { CONSTR_ID ci  }
-  | string as s           { STRING s      }
-  | char as c             { CHAR c        }
   | int as i              { INT (Mint.of_string i) }
   | binop as b            { BINOP b       }
   | '<'                   { LESS          }
@@ -86,6 +84,29 @@ rule token = parse
   | '*'                   { STAR          }
   | '_'                   { UNDERSCORE    }
   | '&'                   { AMPERSAND     }
+  | string as s           
+  { let res = String.sub s 1 ((String.length s)-2) in
+    STRING s      
+  }
+
+  | char as c             
+  { let res = match c.[1] with
+    | '\\' -> match c with
+      | "'\\\\'" -> '\\'
+      | "'\\''"  -> '\''
+      | "'\\n'"  -> '\n'
+      | "'\\t'"  -> '\t'
+      | "'\\b'"  -> '\b'
+      | "'\\r'"  -> '\r'
+      | code -> let code_str = String.sub code 2 ((String.length code)-3) in 
+                let code_int = int_of_string code_str in
+                char_of_int code_int
+    | ch -> let code_int = int_of_string ch in
+                char_of_int code_int
+    in 
+    CHAR res      
+  }
+
 (*
 and comment level = parse
   | "*}" {
