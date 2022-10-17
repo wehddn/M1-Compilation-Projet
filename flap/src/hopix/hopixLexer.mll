@@ -118,8 +118,8 @@ rule token = parse
                             | 't' -> '\t'
                             | 'b' -> '\b'
                             | 'r' -> '\r'
-                            | '0' -> 's'
-                            | _ -> ' '
+                            | '"' -> '"'
+                            | '0' -> '0'
                             in x_res :: (do_all xs)
       | x :: xs -> x :: (do_all xs) in
 
@@ -131,20 +131,20 @@ rule token = parse
     STRING str_res      
   }
 
-  | char as c             
-  { let res = match c.[1] with
-    | '\\' -> match c with
-      | "'\\\\'" -> '\\'
-      | "'\\''"  -> '\''
-      | "'\\n'"  -> '\n'
-      | "'\\t'"  -> '\t'
-      | "'\\b'"  -> '\b'
-      | "'\\r'"  -> '\r'
-      | code -> let code_str = String.sub code 2 ((String.length code)-3) in 
+  | char as ch             
+  { let c = String.sub ch 1 ((String.length ch)-2) in
+    let res = (match c.[0] with
+    | '\\' -> (match c with
+      | "\\\\" -> '\\'
+      | "\\'"  -> '\''
+      | "\\n"  -> '\n'
+      | "\\t"  -> '\t'
+      | "\\b"  -> '\b'
+      | "\\r"  -> '\r'
+      | code -> let code_str = String.sub code 1 ((String.length code)-1) in
                 let code_int = int_of_string code_str in
-                char_of_int code_int
-    | ch -> let code_int = int_of_string ch in
-                char_of_int code_int
+                char_of_int code_int)
+    | c1 -> c1)
     in 
     CHAR res      
   }
