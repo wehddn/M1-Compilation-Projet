@@ -1,0 +1,7 @@
+Error (typechecking)
+  Type error:
+Expected:
+  t
+Given:
+  t -> t
+

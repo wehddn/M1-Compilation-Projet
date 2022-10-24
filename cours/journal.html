@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
 <head>
-<!-- 2022-10-17 lun. 13:13 -->
+<!-- 2022-10-24 lun. 14:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Compilation 2022/2023 &#x2013; Journal du cours</title>
@@ -201,73 +201,78 @@
 <h2>Table des matières</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org01f63a1">1. Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></a>
+<li><a href="#orgd367111">1. Cours 01 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org534247e">1.1. Présentation</a></li>
-<li><a href="#org6c7c690">1.2. Contenu et objectifs du cours</a>
+<li><a href="#org06d0022">1.1. Présentation</a></li>
+<li><a href="#orgcf7e03c">1.2. Contenu et objectifs du cours</a>
 <ul>
-<li><a href="#org35d1f97">1.2.1. Introduction au cours</a></li>
-<li><a href="#org23beafd">1.2.2. Pourquoi étudier la compilation ?</a></li>
+<li><a href="#org8281ccc">1.2.1. Introduction au cours</a></li>
+<li><a href="#orgb2f40a8">1.2.2. Pourquoi étudier la compilation ?</a></li>
 </ul>
 </li>
-<li><a href="#orgd15dec3">1.3. Fonctionnement du cours</a></li>
-<li><a href="#org426713d">1.4. Introduction à la compilation : le micro-langage Marthe</a></li>
-<li><a href="#org423a425">1.5. À préparer pour le prochain TP et le prochain cours</a>
+<li><a href="#org9641aeb">1.3. Fonctionnement du cours</a></li>
+<li><a href="#org774ee34">1.4. Introduction à la compilation : le micro-langage Marthe</a></li>
+<li><a href="#org7476a7a">1.5. À préparer pour le prochain TP et le prochain cours</a>
 <ul>
-<li><a href="#org3d29334">1.5.1. <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</a></li>
-<li><a href="#orge4d3749">1.5.2. <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</a></li>
-<li><a href="#org187be86">1.5.3. <span class="todo TODO">TODO</span> Prochain séance de cours</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org435950d">2. Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></a>
-<ul>
-<li><a href="#org51a63e4">2.1. Message de service</a></li>
-<li><a href="#org14c33cb">2.2. Le retour de Marthe</a></li>
-<li><a href="#org58c59f0">2.3. Le cours 2</a></li>
-<li><a href="#org6746625">2.4. À préparer pour le prochain TP et le prochain cours</a>
-<ul>
-<li><a href="#org983433a">2.4.1. <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</a></li>
-<li><a href="#org7bac4a4">2.4.2. <span class="todo TODO">TODO</span> Préparer le dépôt du projet</a></li>
+<li><a href="#org6d97502">1.5.1. <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</a></li>
+<li><a href="#org9fad1d4">1.5.2. <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</a></li>
+<li><a href="#org1e57119">1.5.3. <span class="todo TODO">TODO</span> Prochain séance de cours</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org3e93fe8">3. Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></a>
+<li><a href="#org3f0e3a5">2. Cours 02 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org084355d">3.1. Introduction au jalon 1 et au compilateur flap</a></li>
-<li><a href="#org0450e81">3.2. La prochaine fois</a></li>
+<li><a href="#org92d5583">2.1. Message de service</a></li>
+<li><a href="#org42ecced">2.2. Le retour de Marthe</a></li>
+<li><a href="#org75413e5">2.3. Le cours 2</a></li>
+<li><a href="#orgfc5acd7">2.4. À préparer pour le prochain TP et le prochain cours</a>
+<ul>
+<li><a href="#org30cfa92">2.4.1. <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</a></li>
+<li><a href="#org5002692">2.4.2. <span class="todo TODO">TODO</span> Préparer le dépôt du projet</a></li>
 </ul>
 </li>
-<li><a href="#org86e3eb1">4. Cours 04 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-03 lun.&gt;</span></span></a>
-<ul>
-<li><a href="#org980ee44">4.1. Suivi du projet</a>
-<ul>
-<li><a href="#org2fedacb">4.1.1. Pourquoi n'y a-t-il pas de <code>if &lt;expr&gt; then &lt;expr&gt;</code> dans l'AST Hopix ?</a></li>
-<li><a href="#org3e7fc06">4.1.2. Comment gérer les positions ?</a></li>
-<li><a href="#orgca0538d">4.1.3. Questions diverses</a></li>
 </ul>
 </li>
-<li><a href="#org950d06a">4.2. Introduction à la théorie des langages de programmation</a></li>
+<li><a href="#org59a9a31">3. Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></a>
+<ul>
+<li><a href="#org4ce45c0">3.1. Introduction au jalon 1 et au compilateur flap</a></li>
+<li><a href="#org943dd5d">3.2. La prochaine fois</a></li>
 </ul>
 </li>
-<li><a href="#orga1d0620">5. Cours 05 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-10 lun.&gt;</span></span></a>
+<li><a href="#orgfa868d2">4. Cours 04 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-03 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org1f79a21">5.1. Suivi du projet</a>
+<li><a href="#org9bc6053">4.1. Suivi du projet</a>
 <ul>
-<li><a href="#org31f00c9">5.1.1. À propos des erreurs</a></li>
-<li><a href="#org856e8cb">5.1.2. À propos des positions</a></li>
+<li><a href="#org10ca528">4.1.1. Pourquoi n'y a-t-il pas de <code>if &lt;expr&gt; then &lt;expr&gt;</code> dans l'AST Hopix ?</a></li>
+<li><a href="#org8080c36">4.1.2. Comment gérer les positions ?</a></li>
+<li><a href="#org506dcfd">4.1.3. Questions diverses</a></li>
 </ul>
 </li>
-<li><a href="#org6ad4d46">5.2. Les réponses aux exercices de code du cours 4</a></li>
-<li><a href="#org8f78faf">5.3. Introduction à la théorie des langages de programmation</a></li>
+<li><a href="#org98283ab">4.2. Introduction à la théorie des langages de programmation</a></li>
 </ul>
 </li>
-<li><a href="#org32d8be8">6. Cours 6 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-17 lun.&gt;</span></span></a>
+<li><a href="#org864f425">5. Cours 05 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-10 lun.&gt;</span></span></a>
 <ul>
-<li><a href="#org1017155">6.1. Introduction au jalon 2</a></li>
-<li><a href="#orgafc23be">6.2. Introduction à la théorie des langages de programmation</a></li>
+<li><a href="#org087ba8e">5.1. Suivi du projet</a>
+<ul>
+<li><a href="#org96d1270">5.1.1. À propos des erreurs</a></li>
+<li><a href="#orgae4e6a1">5.1.2. À propos des positions</a></li>
+</ul>
+</li>
+<li><a href="#org26b956e">5.2. Les réponses aux exercices de code du cours 4</a></li>
+<li><a href="#org9976047">5.3. Introduction à la théorie des langages de programmation</a></li>
+</ul>
+</li>
+<li><a href="#org20a5a06">6. Cours 06 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-17 lun.&gt;</span></span></a>
+<ul>
+<li><a href="#org19a3c20">6.1. Introduction au jalon 2</a></li>
+<li><a href="#org07be0aa">6.2. Introduction à la théorie des langages de programmation</a></li>
+</ul>
+</li>
+<li><a href="#org930ca64">7. Cours 07 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-24 lun.&gt;</span></span></a>
+<ul>
+<li><a href="#org3fb10ec">7.1. Jalon 3</a></li>
 </ul>
 </li>
 </ul>
@@ -279,12 +284,12 @@ Ce fichier est disponible au
 HTML</a>.
 </p>
 
-<div id="outline-container-org01f63a1" class="outline-2">
-<h2 id="org01f63a1"><span class="section-number-2">1.</span> Cours 1 : Introduction <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></h2>
+<div id="outline-container-orgd367111" class="outline-2">
+<h2 id="orgd367111"><span class="section-number-2">1.</span> Cours 01 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-12 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org534247e" class="outline-3">
-<h3 id="org534247e"><span class="section-number-3">1.1.</span> Présentation</h3>
+<div id="outline-container-org06d0022" class="outline-3">
+<h3 id="org06d0022"><span class="section-number-3">1.1.</span> Présentation</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 Bienvenue en Master 1 !
@@ -332,12 +337,12 @@ Bienvenue en Master 1 !
 </p>
 </div>
 </div>
-<div id="outline-container-org6c7c690" class="outline-3">
-<h3 id="org6c7c690"><span class="section-number-3">1.2.</span> Contenu et objectifs du cours</h3>
+<div id="outline-container-orgcf7e03c" class="outline-3">
+<h3 id="orgcf7e03c"><span class="section-number-3">1.2.</span> Contenu et objectifs du cours</h3>
 <div class="outline-text-3" id="text-1-2">
 </div>
-<div id="outline-container-org35d1f97" class="outline-4">
-<h4 id="org35d1f97"><span class="section-number-4">1.2.1.</span> Introduction au cours</h4>
+<div id="outline-container-org8281ccc" class="outline-4">
+<h4 id="org8281ccc"><span class="section-number-4">1.2.1.</span> Introduction au cours</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 En licence, vous avez acquis les bases de l'informatique : appris à
@@ -366,8 +371,8 @@ intégration continue, etc.
 </p>
 </div>
 </div>
-<div id="outline-container-org23beafd" class="outline-4">
-<h4 id="org23beafd"><span class="section-number-4">1.2.2.</span> Pourquoi étudier la compilation ?</h4>
+<div id="outline-container-orgb2f40a8" class="outline-4">
+<h4 id="orgb2f40a8"><span class="section-number-4">1.2.2.</span> Pourquoi étudier la compilation ?</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 Ce n'est pas une compétence directement mobilisable dans la plupart des
@@ -407,8 +412,8 @@ réaliste !
 </div>
 </div>
 </div>
-<div id="outline-container-orgd15dec3" class="outline-3">
-<h3 id="orgd15dec3"><span class="section-number-3">1.3.</span> Fonctionnement du cours</h3>
+<div id="outline-container-org9641aeb" class="outline-3">
+<h3 id="org9641aeb"><span class="section-number-3">1.3.</span> Fonctionnement du cours</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 Vous avez tous reçu une copie de la description du cours (son <i>syllabus</i>,
@@ -465,8 +470,8 @@ en compte.
 </p>
 </div>
 </div>
-<div id="outline-container-org426713d" class="outline-3">
-<h3 id="org426713d"><span class="section-number-3">1.4.</span> Introduction à la compilation : le micro-langage Marthe</h3>
+<div id="outline-container-org774ee34" class="outline-3">
+<h3 id="org774ee34"><span class="section-number-3">1.4.</span> Introduction à la compilation : le micro-langage Marthe</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 Le reste de la séance est consacré à la lecture et discussion d'un
@@ -475,12 +480,12 @@ micro-langage de programmation, Marthe. Voir le fichier
 </p>
 </div>
 </div>
-<div id="outline-container-org423a425" class="outline-3">
-<h3 id="org423a425"><span class="section-number-3">1.5.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div id="outline-container-org7476a7a" class="outline-3">
+<h3 id="org7476a7a"><span class="section-number-3">1.5.</span> À préparer pour le prochain TP et le prochain cours</h3>
 <div class="outline-text-3" id="text-1-5">
 </div>
-<div id="outline-container-org3d29334" class="outline-4">
-<h4 id="org3d29334"><span class="section-number-4">1.5.1.</span> <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</h4>
+<div id="outline-container-org6d97502" class="outline-4">
+<h4 id="org6d97502"><span class="section-number-4">1.5.1.</span> <span class="todo TODO">TODO</span> Prochaine séance de travaux pratiques</h4>
 <div class="outline-text-4" id="text-1-5-1">
 <ul class="org-ul">
 <li>Venir avec son ordinateur portable, vendredi</li>
@@ -489,16 +494,16 @@ fonctionnel (compilateur OCaml, OPAM, dune).</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orge4d3749" class="outline-4">
-<h4 id="orge4d3749"><span class="section-number-4">1.5.2.</span> <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</h4>
+<div id="outline-container-org9fad1d4" class="outline-4">
+<h4 id="org9fad1d4"><span class="section-number-4">1.5.2.</span> <span class="todo TODO">TODO</span> S'inscrire sur la liste de diffusion du cours</h4>
 <div class="outline-text-4" id="text-1-5-2">
 <p>
 <a href="https://listes.u-paris.fr/wws/info/m1.2022.compilation.info">https://listes.u-paris.fr/wws/info/m1.2022.compilation.info</a>
 </p>
 </div>
 </div>
-<div id="outline-container-org187be86" class="outline-4">
-<h4 id="org187be86"><span class="section-number-4">1.5.3.</span> <span class="todo TODO">TODO</span> Prochain séance de cours</h4>
+<div id="outline-container-org1e57119" class="outline-4">
+<h4 id="org1e57119"><span class="section-number-4">1.5.3.</span> <span class="todo TODO">TODO</span> Prochain séance de cours</h4>
 <div class="outline-text-4" id="text-1-5-3">
 <ul class="org-ul">
 <li>Finir la gestion des commentaires dans <code>marthe.ml</code>.</li>
@@ -507,12 +512,12 @@ fonctionnel (compilateur OCaml, OPAM, dune).</li>
 </div>
 </div>
 </div>
-<div id="outline-container-org435950d" class="outline-2">
-<h2 id="org435950d"><span class="section-number-2">2.</span> Cours 2 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></h2>
+<div id="outline-container-org3f0e3a5" class="outline-2">
+<h2 id="org3f0e3a5"><span class="section-number-2">2.</span> Cours 02 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-19 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org51a63e4" class="outline-3">
-<h3 id="org51a63e4"><span class="section-number-3">2.1.</span> Message de service</h3>
+<div id="outline-container-org92d5583" class="outline-3">
+<h3 id="org92d5583"><span class="section-number-3">2.1.</span> Message de service</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 La liste a été configurée correctement, les étudiants et étudiantes peuvent
@@ -524,8 +529,8 @@ désormais s'inscrire avec leur adresse courriel favorite.
 </p>
 </div>
 </div>
-<div id="outline-container-org14c33cb" class="outline-3">
-<h3 id="org14c33cb"><span class="section-number-3">2.2.</span> Le retour de Marthe</h3>
+<div id="outline-container-org42ecced" class="outline-3">
+<h3 id="org42ecced"><span class="section-number-3">2.2.</span> Le retour de Marthe</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Dans <a href="cours-01/marthe.ml">marthe.ml</a>, on ajoute les commentaires à
@@ -533,20 +538,20 @@ l'analyseur lexical, et on lit l'analyseur syntaxique.
 </p>
 </div>
 </div>
-<div id="outline-container-org58c59f0" class="outline-3">
-<h3 id="org58c59f0"><span class="section-number-3">2.3.</span> Le cours 2</h3>
+<div id="outline-container-org75413e5" class="outline-3">
+<h3 id="org75413e5"><span class="section-number-3">2.3.</span> Le cours 2</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-org6746625" class="outline-3">
-<h3 id="org6746625"><span class="section-number-3">2.4.</span> À préparer pour le prochain TP et le prochain cours</h3>
+<div id="outline-container-orgfc5acd7" class="outline-3">
+<h3 id="orgfc5acd7"><span class="section-number-3">2.4.</span> À préparer pour le prochain TP et le prochain cours</h3>
 <div class="outline-text-3" id="text-2-4">
 </div>
-<div id="outline-container-org983433a" class="outline-4">
-<h4 id="org983433a"><span class="section-number-4">2.4.1.</span> <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</h4>
+<div id="outline-container-org30cfa92" class="outline-4">
+<h4 id="org30cfa92"><span class="section-number-4">2.4.1.</span> <span class="todo TODO">TODO</span> Lire la documentation des outils ocamllex et Menhir</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <ul class="org-ul">
 <li><a href="https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html">https://caml.inria.fr/pub/docs/manual-ocaml/lexyacc.html</a></li>
@@ -554,8 +559,8 @@ Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </ul>
 </div>
 </div>
-<div id="outline-container-org7bac4a4" class="outline-4">
-<h4 id="org7bac4a4"><span class="section-number-4">2.4.2.</span> <span class="todo TODO">TODO</span> Préparer le dépôt du projet</h4>
+<div id="outline-container-org5002692" class="outline-4">
+<h4 id="org5002692"><span class="section-number-4">2.4.2.</span> <span class="todo TODO">TODO</span> Préparer le dépôt du projet</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <ul class="org-ul">
 <li>Forker le dépôt Git du projet</li>
@@ -576,12 +581,12 @@ Voir les <a href="cours-02/cours-02-parsing.pdf">transparents</a>.
 </div>
 </div>
 </div>
-<div id="outline-container-org3e93fe8" class="outline-2">
-<h2 id="org3e93fe8"><span class="section-number-2">3.</span> Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></h2>
+<div id="outline-container-org59a9a31" class="outline-2">
+<h2 id="org59a9a31"><span class="section-number-2">3.</span> Cours 03 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-09-26 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org084355d" class="outline-3">
-<h3 id="org084355d"><span class="section-number-3">3.1.</span> Introduction au jalon 1 et au compilateur flap</h3>
+<div id="outline-container-org4ce45c0" class="outline-3">
+<h3 id="org4ce45c0"><span class="section-number-3">3.1.</span> Introduction au jalon 1 et au compilateur flap</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Voir le <a href="../flap">code</a> du compilateur Flap, ainsi que l'énoncé du
@@ -589,8 +594,8 @@ Voir le <a href="../flap">code</a> du compilateur Flap, ainsi que l'énoncé du
 </p>
 </div>
 </div>
-<div id="outline-container-org0450e81" class="outline-3">
-<h3 id="org0450e81"><span class="section-number-3">3.2.</span> La prochaine fois</h3>
+<div id="outline-container-org943dd5d" class="outline-3">
+<h3 id="org943dd5d"><span class="section-number-3">3.2.</span> La prochaine fois</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li>On terminera de lire <code>marthe.ml</code>.</li>
@@ -600,16 +605,16 @@ Voir le <a href="../flap">code</a> du compilateur Flap, ainsi que l'énoncé du
 </div>
 </div>
 </div>
-<div id="outline-container-org86e3eb1" class="outline-2">
-<h2 id="org86e3eb1"><span class="section-number-2">4.</span> Cours 04 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-03 lun.&gt;</span></span></h2>
+<div id="outline-container-orgfa868d2" class="outline-2">
+<h2 id="orgfa868d2"><span class="section-number-2">4.</span> Cours 04 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-03 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org980ee44" class="outline-3">
-<h3 id="org980ee44"><span class="section-number-3">4.1.</span> Suivi du projet</h3>
+<div id="outline-container-org9bc6053" class="outline-3">
+<h3 id="org9bc6053"><span class="section-number-3">4.1.</span> Suivi du projet</h3>
 <div class="outline-text-3" id="text-4-1">
 </div>
-<div id="outline-container-org2fedacb" class="outline-4">
-<h4 id="org2fedacb"><span class="section-number-4">4.1.1.</span> Pourquoi n'y a-t-il pas de <code>if &lt;expr&gt; then &lt;expr&gt;</code> dans l'AST Hopix ?</h4>
+<div id="outline-container-org10ca528" class="outline-4">
+<h4 id="org10ca528"><span class="section-number-4">4.1.1.</span> Pourquoi n'y a-t-il pas de <code>if &lt;expr&gt; then &lt;expr&gt;</code> dans l'AST Hopix ?</h4>
 <div class="outline-text-4" id="text-4-1-1">
 <p>
 Une partie du <i>sucre syntaxique</i> est éliminée lors de l'analyse
@@ -618,8 +623,8 @@ même façon que celui d'OCaml.
 </p>
 </div>
 </div>
-<div id="outline-container-org3e7fc06" class="outline-4">
-<h4 id="org3e7fc06"><span class="section-number-4">4.1.2.</span> Comment gérer les positions ?</h4>
+<div id="outline-container-org8080c36" class="outline-4">
+<h4 id="org8080c36"><span class="section-number-4">4.1.2.</span> Comment gérer les positions ?</h4>
 <div class="outline-text-4" id="text-4-1-2">
 <p>
 Menhir ne connaît pas le fichier source, uniquement le <code>lexbuf</code>. C'est donc
@@ -640,7 +645,7 @@ Menhir <code>$startpos</code> et <code>$endpos</code>. Dans le fichier fourni, l
 passera par la règle paramétrique <code>located(X)</code>.
 </p>
 
-<div class="VERBATIM" id="org18228a1">
+<div class="VERBATIM" id="orgad0b971">
 <p>
 %inline located(X): x=X {
   Position.with_poss $startpos $endpos x
@@ -656,8 +661,8 @@ valeur de type <code>'a located</code>.
 </p>
 </div>
 </div>
-<div id="outline-container-orgca0538d" class="outline-4">
-<h4 id="orgca0538d"><span class="section-number-4">4.1.3.</span> Questions diverses</h4>
+<div id="outline-container-org506dcfd" class="outline-4">
+<h4 id="org506dcfd"><span class="section-number-4">4.1.3.</span> Questions diverses</h4>
 <div class="outline-text-4" id="text-4-1-3">
 <p>
 J'apporte quelques précisions à l'énoncé du jalon 1.
@@ -665,8 +670,8 @@ J'apporte quelques précisions à l'énoncé du jalon 1.
 </div>
 </div>
 </div>
-<div id="outline-container-org950d06a" class="outline-3">
-<h3 id="org950d06a"><span class="section-number-3">4.2.</span> Introduction à la théorie des langages de programmation</h3>
+<div id="outline-container-org98283ab" class="outline-3">
+<h3 id="org98283ab"><span class="section-number-3">4.2.</span> Introduction à la théorie des langages de programmation</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 Voir la première partie des
@@ -677,16 +682,16 @@ séance.
 </div>
 </div>
 </div>
-<div id="outline-container-orga1d0620" class="outline-2">
-<h2 id="orga1d0620"><span class="section-number-2">5.</span> Cours 05 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-10 lun.&gt;</span></span></h2>
+<div id="outline-container-org864f425" class="outline-2">
+<h2 id="org864f425"><span class="section-number-2">5.</span> Cours 05 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-10 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-org1f79a21" class="outline-3">
-<h3 id="org1f79a21"><span class="section-number-3">5.1.</span> Suivi du projet</h3>
+<div id="outline-container-org087ba8e" class="outline-3">
+<h3 id="org087ba8e"><span class="section-number-3">5.1.</span> Suivi du projet</h3>
 <div class="outline-text-3" id="text-5-1">
 </div>
-<div id="outline-container-org31f00c9" class="outline-4">
-<h4 id="org31f00c9"><span class="section-number-4">5.1.1.</span> À propos des erreurs</h4>
+<div id="outline-container-org96d1270" class="outline-4">
+<h4 id="org96d1270"><span class="section-number-4">5.1.1.</span> À propos des erreurs</h4>
 <div class="outline-text-4" id="text-5-1-1">
 <p>
 Les erreurs doivent de syntaxe doivent être levées via la fonction
@@ -694,8 +699,8 @@ Les erreurs doivent de syntaxe doivent être levées via la fonction
 </p>
 </div>
 </div>
-<div id="outline-container-org856e8cb" class="outline-4">
-<h4 id="org856e8cb"><span class="section-number-4">5.1.2.</span> À propos des positions</h4>
+<div id="outline-container-orgae4e6a1" class="outline-4">
+<h4 id="orgae4e6a1"><span class="section-number-4">5.1.2.</span> À propos des positions</h4>
 <div class="outline-text-4" id="text-5-1-2">
 <p>
 Les positions générées dans les messages d'erreur peuvent dépendre de
@@ -706,8 +711,8 @@ tests fournis avec le jalon.
 </div>
 </div>
 </div>
-<div id="outline-container-org6ad4d46" class="outline-3">
-<h3 id="org6ad4d46"><span class="section-number-3">5.2.</span> Les réponses aux exercices de code du cours 4</h3>
+<div id="outline-container-org26b956e" class="outline-3">
+<h3 id="org26b956e"><span class="section-number-3">5.2.</span> Les réponses aux exercices de code du cours 4</h3>
 <div class="outline-text-3" id="text-5-2">
 <div class="org-src-container">
 <pre class="src src-ocaml"><span style="color: #f5deb3; font-weight: bold;">let</span> <span style="color: #f5deb3; font-weight: bold;">rec</span> <span style="font-weight: bold; font-style: italic;">free_vars</span> =
@@ -795,8 +800,8 @@ tests fournis avec le jalon.
 </div>
 </div>
 </div>
-<div id="outline-container-org8f78faf" class="outline-3">
-<h3 id="org8f78faf"><span class="section-number-3">5.3.</span> Introduction à la théorie des langages de programmation</h3>
+<div id="outline-container-org9976047" class="outline-3">
+<h3 id="org9976047"><span class="section-number-3">5.3.</span> Introduction à la théorie des langages de programmation</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 Voir la deuxième partie des
@@ -806,12 +811,12 @@ dédiés. On a traité la substitution de la première partie.
 </div>
 </div>
 </div>
-<div id="outline-container-org32d8be8" class="outline-2">
-<h2 id="org32d8be8"><span class="section-number-2">6.</span> Cours 6 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-17 lun.&gt;</span></span></h2>
+<div id="outline-container-org20a5a06" class="outline-2">
+<h2 id="org20a5a06"><span class="section-number-2">6.</span> Cours 06 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-17 lun.&gt;</span></span></h2>
 <div class="outline-text-2" id="text-6">
 </div>
-<div id="outline-container-org1017155" class="outline-3">
-<h3 id="org1017155"><span class="section-number-3">6.1.</span> Introduction au jalon 2</h3>
+<div id="outline-container-org19a3c20" class="outline-3">
+<h3 id="org19a3c20"><span class="section-number-3">6.1.</span> Introduction au jalon 2</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 On discute en détail l'énoncé du deuxième jalon, qui consiste en l'écriture
@@ -819,8 +824,8 @@ d'un inteprète pour Hopix.
 </p>
 </div>
 </div>
-<div id="outline-container-orgafc23be" class="outline-3">
-<h3 id="orgafc23be"><span class="section-number-3">6.2.</span> Introduction à la théorie des langages de programmation</h3>
+<div id="outline-container-org07be0aa" class="outline-3">
+<h3 id="org07be0aa"><span class="section-number-3">6.2.</span> Introduction à la théorie des langages de programmation</h3>
 <div class="outline-text-3" id="text-6-2">
 <p>
 Voir la troisième et dernière partie des
@@ -830,10 +835,84 @@ dédiés.
 </div>
 </div>
 </div>
+<div id="outline-container-org930ca64" class="outline-2">
+<h2 id="org930ca64"><span class="section-number-2">7.</span> Cours 07 <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-10-24 lun.&gt;</span></span></h2>
+<div class="outline-text-2" id="text-7">
+</div>
+<div id="outline-container-org3fb10ec" class="outline-3">
+<h3 id="org3fb10ec"><span class="section-number-3">7.1.</span> Jalon 3</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+On passe la séance à discuter de l'énoncé du jalon 3, à rendre pour dans
+trois semaines. Le pseudo-code OCaml suivant a été donné.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ocaml"><span style="color: #f5deb3; font-weight: bold;">let</span> <span style="color: #f5deb3; font-weight: bold;">rec</span> <span style="font-weight: bold; font-style: italic;">type_of_expression</span> :<span style="font-weight: bold; text-decoration: underline;"> typing_environment -&gt; expression -&gt; aty </span>=
+  <span style="font-weight: bold;">fun</span> &#915; <span style="font-weight: bold; font-style: italic;">e</span> -&gt;
+  <span style="font-weight: bold;">match</span> e <span style="font-weight: bold;">with</span>
+  <span style="font-weight: bold; font-style: italic;">(* </span><span style="font-weight: bold; font-style: italic;">Exemple : le cas de l'addition. N.B. : ce cas n'existe pas en Hopix, car</span>
+<span style="font-weight: bold; font-style: italic;">     l'addition n'y est pas primitive. On vous le donne parce qu'il s'agit sans</span>
+<span style="font-weight: bold; font-style: italic;">     doute du constructeur d'expression le plus simple &#224; typer qui soit, hormis</span>
+<span style="font-weight: bold; font-style: italic;">     celui correspondant aux constantes litt&#233;rales.</span><span style="font-weight: bold; font-style: italic;"> *)</span>
+  | Add (e&#8321;, e&#8322;) -&gt;
+    <span style="font-weight: bold; font-style: italic;">(*</span>
+<span style="font-weight: bold; font-style: italic;">      &#915; &#8866; e&#8321; : int    &#915; &#8866; e&#8322; : int</span>
+<span style="font-weight: bold; font-style: italic;">      ----------------------------</span>
+<span style="font-weight: bold; font-style: italic;">           &#915; &#8866; e&#8321; + e&#8322; : int</span>
+<span style="font-weight: bold; font-style: italic;">     *)</span>
+    check_type_expression &#915; e&#8321; ATyInt;
+    check_type_expression &#915; e&#8322; ATyInt;
+    ATyInt
+
+  <span style="font-weight: bold; font-style: italic;">(* </span><span style="font-weight: bold; font-style: italic;">Exemple : le cas de l'application.</span><span style="font-weight: bold; font-style: italic;"> *)</span>
+  | Apply (e&#8321;, e&#8322;) -&gt;
+    <span style="font-weight: bold; font-style: italic;">(*</span>
+<span style="font-weight: bold; font-style: italic;">      &#915; &#8866; e&#8321; : &#964;&#8321; &#8594; &#964;&#8322;    &#915; &#8866; e&#8322; : &#964;&#8321;</span>
+<span style="font-weight: bold; font-style: italic;">      -------------------------------</span>
+<span style="font-weight: bold; font-style: italic;">             &#915; &#8866; e&#8321; e&#8322; : &#964;&#8322;</span>
+<span style="font-weight: bold; font-style: italic;">     *)</span>
+    <span style="color: #f5deb3; font-weight: bold;">begin</span> <span style="font-weight: bold;">match</span> type_of_expression &#915; e&#8321; <span style="font-weight: bold;">with</span>
+    | ATyArrow (&#964;&#8321;, &#964;&#8322;) -&gt;
+      check_type_expression &#915; e&#8322; &#964;&#8321;;
+      &#964;&#8322;
+   | _ -&gt; erreur ()
+   <span style="color: #f5deb3; font-weight: bold;">end</span>
+
+  <span style="font-weight: bold; font-style: italic;">(* </span><span style="font-weight: bold; font-style: italic;">Exemple : le cas de la fonction, qui a besoin d'une annotation.</span><span style="font-weight: bold; font-style: italic;"> *)</span>
+  | Fun (x, Some &#964;&#8321;, e) -&gt;
+    <span style="font-weight: bold; font-style: italic;">(*</span>
+<span style="font-weight: bold; font-style: italic;">          &#915;, x : &#964;&#8321; &#8866; e : &#964;&#8322;</span>
+<span style="font-weight: bold; font-style: italic;">      -------------------------</span>
+<span style="font-weight: bold; font-style: italic;">      &#915; &#8866; fun (x : &#964;&#8321;) &#8594; e : &#964;&#8322;</span>
+<span style="font-weight: bold; font-style: italic;">     *)</span>
+    check_well_formed_type &#915; &#964;&#8321;;
+    <span style="color: #f5deb3; font-weight: bold;">let</span> &#964;&#8322; = type_of_expression (<span style="font-weight: bold; text-decoration: underline;">Env.</span>add x &#964;&#8321; &#915;) e&#8322; <span style="color: #f5deb3; font-weight: bold;">in</span>
+    ATyArrow (&#964;&#8321;, &#964;&#8322;)
+
+  <span style="font-weight: bold; font-style: italic;">(* </span><span style="font-weight: bold; font-style: italic;">Exemple : le cas de la variable, qui a besoin d'une annotation.</span><span style="font-weight: bold; font-style: italic;"> *)</span>
+  | Var (x, Some types) -&gt;
+    <span style="font-weight: bold; font-style: italic;">(*</span>
+<span style="font-weight: bold; font-style: italic;">      &#915;(x) = &#8704;&#945;&#8321;,...,&#945;&#8345;.&#964;   &#915; &#8866; &#964;&#8321;   ...   &#915; &#8866; &#964;&#8345;</span>
+<span style="font-weight: bold; font-style: italic;">      --------------------------------------------</span>
+<span style="font-weight: bold; font-style: italic;">         &#915; &#8866; x^[&#964;&#8321;;...;&#964;&#8345;] : &#964;[&#945;&#8321;\&#964;&#8321;,...,&#945;&#8345;\&#964;&#8345;]</span>
+<span style="font-weight: bold; font-style: italic;">     *)</span>
+    <span style="color: #f5deb3; font-weight: bold;">let</span> Scheme (<span style="font-weight: bold; font-style: italic;">ts</span>, <span style="font-weight: bold; font-style: italic;">ty</span>) = <span style="font-weight: bold; text-decoration: underline;">Env.</span>lookup &#915; x <span style="color: #f5deb3; font-weight: bold;">in</span>
+    <span style="font-weight: bold; text-decoration: underline;">List.</span>iter check_wellformed_type types;
+    <span style="font-weight: bold; text-decoration: underline;">HopixTypes.</span>instantiate (Scheme (ts, ty)) types
+
+<span style="color: #f5deb3; font-weight: bold;">and</span> <span style="font-weight: bold;">check_type_expression</span> &#915; <span style="font-weight: bold; font-style: italic;">e</span> &#964; =
+  <span style="color: #f5deb3; font-weight: bold;">let</span> &#964;' = type_of_expression &#915; e <span style="color: #f5deb3; font-weight: bold;">in</span>
+  <span style="font-weight: bold;">if</span> <span style="color: #f0e68c;">not</span> (&#964; = &#964;') <span style="font-weight: bold;">then</span> erreur ()
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Auteur: Adrien Guatto</p>
-<p class="date">Created: 2022-10-17 lun. 13:13</p>
+<p class="date">Created: 2022-10-24 lun. 14:33</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
