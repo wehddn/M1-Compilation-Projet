@@ -365,9 +365,13 @@ and expression _ environment memory = function
   | Tagged (c, ty, el) -> 
     let vc = Position.value c in
     let vel = List.map (expression' environment memory) el in
-    VTagged(vc, vel);
+    VTagged(vc, vel)
 
-  | _ -> failwith "Students! This is your job expr()!"
+  | Record (l,_) -> 
+    let vl = List.map (fun (x,y) -> (Position.value x, expression' environment memory y)) l in
+    VRecord(vl)
+
+  | _ -> failwith "Students! This is your job expr!"
 
 and literal = function
   | LInt x -> VInt x
