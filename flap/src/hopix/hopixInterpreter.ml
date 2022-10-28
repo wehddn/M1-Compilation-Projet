@@ -319,7 +319,20 @@ let rec evaluate runtime ast =
 
 *)
 and definition runtime d =
-failwith "Students! This is your job!"
+  match Position.value d with
+    | DefineValue d ->
+    {
+      runtime with environment = value_definition runtime.environment runtime.memory d
+    }
+    | _ -> failwith "Students! This is your job (def)!"
+
+and value_definition environment memory = function
+  | SimpleValue (x, _, e) -> 
+    let v = expression' environment memory e in 
+    bind_identifier environment x v
+
+and bind_identifier environment x v =
+  Environment.bind environment (Position.value x) v
 
 and expression' environment memory e =
   expression (position e) environment memory (value e)
@@ -330,8 +343,40 @@ and expression' environment memory e =
 
    and E = [runtime.environment], M = [runtime.memory].
 *)
-and expression _ environment memory =
-failwith "Students! This is your job!"
+and expression _ environment memory = function
+  | Apply (a, b) ->
+    let vb = expression' environment memory b in
+    begin match expression' environment memory a with
+      | VPrimitive (_, f) ->
+        f memory vb
+      | _ -> failwith "Students! This is your job expr - apply!"
+    end
+  
+  | Variable (x, _) ->
+    Environment.lookup (Position.position x) (Position.value x) environment
+
+  | Sequence(ls) ->
+    let vs = List.map (expression' environment memory) ls in
+    List.(hd (rev vs))
+
+  | Literal l ->
+    literal (Position.value l)
+  | _ -> failwith "Students! This is your job expr()!"
+
+and literal = function
+  | LInt x -> VInt x
+  | LChar c -> VChar c
+  | LString s -> VString s
+
+and expressions environment memory es =
+  let rec aux vs = function
+    | [] ->
+      List.rev vs
+    | e :: es ->
+      let v = expression environment memory e in
+      aux (v :: vs) es
+  in
+  aux [] es
 
 (** This function returns the difference between two runtimes. *)
 and extract_observable runtime runtime' =
