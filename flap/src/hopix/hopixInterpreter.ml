@@ -349,6 +349,7 @@ and expression _ environment memory = function
     begin match expression' environment memory a with
       | VPrimitive (_, f) ->
         f memory vb
+      | VClosure (env,p,e) -> failwith "Students! This is your job expr - VClosure apply!"
       | _ -> failwith "Students! This is your job expr - apply!"
     end
   
@@ -370,6 +371,32 @@ and expression _ environment memory = function
   | Record (l,_) -> 
     let vl = List.map (fun (x,y) -> (Position.value x, expression' environment memory y)) l in
     VRecord(vl)
+
+  | Fun (FunctionDefinition(p,e)) -> VClosure(environment,p,e)
+
+  | Tuple t -> 
+    let vt = List.map (expression' environment memory) t in
+    VTuple(vt)
+
+  | Field (_,_) -> failwith "Students! This is your job Field expr!"
+
+  | Define (_,_) -> failwith "Students! This is your job Define expr!"
+
+  | Ref _ -> failwith "Students! This is your job Ref expr!"
+
+  | Assign (_,_) -> failwith "Students! This is your job Assign expr!"
+
+  | Read _ -> failwith "Students! This is your job Read expr!"
+
+  | Case (_,_) -> failwith "Students! This is your job Case expr!"
+
+  | IfThenElse (_,_,_) -> failwith "Students! This is your job IfThenElse expr!"
+
+  | While (_,_) -> failwith "Students! This is your job While expr!"
+
+  | For (_,_,_,_) -> failwith "Students! This is your job For expr!"
+
+  | TypeAnnotation (_,_) -> failwith "Students! This is your job TypeAnnotation expr!"
 
   | _ -> failwith "Students! This is your job expr!"
 
