@@ -359,13 +359,14 @@ and expression _ environment memory = function
     let vs = List.map (expression' environment memory) ls in
     List.(hd (rev vs))
 
+  | Literal l ->
+    literal (Position.value l)
+
   | Tagged (c, ty, el) -> 
     let vc = Position.value c in
     let vel = List.map (expression' environment memory) el in
     VTagged(vc, vel);
 
-  | Literal l ->
-    literal (Position.value l)
   | _ -> failwith "Students! This is your job expr()!"
 
 and literal = function
