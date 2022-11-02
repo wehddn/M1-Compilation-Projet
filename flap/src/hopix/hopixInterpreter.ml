@@ -392,8 +392,13 @@ and expression _ environment memory = function
 
   | Assign (_,_) -> failwith "Students! This is your job Assign expr!"
 
-  | Read _ -> failwith "Students! This is your job Read expr!"
-
+  | Read (e) ->
+    let e = expression' environment memory e in(
+      match e with
+      | VLocation a -> 
+        let da = Memory.dereference memory a in 
+        Memory.read da 0L )
+    
   | Case (_,_) -> failwith "Students! This is your job Case expr!"
 
   | IfThenElse (c, t, f) ->
