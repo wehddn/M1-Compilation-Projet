@@ -384,7 +384,14 @@ and expression _ environment memory = function
     let runtime = value_definition environment memory vd in
     expression (Position.position e) runtime memory (Position.value e)
 
-  | Ref _ -> failwith "Students! This is your job Ref expr!"
+  | Ref e -> 
+    begin match expression' environment memory e with
+      | VInt x ->
+        let a = Memory.allocate memory x (VInt Int64.zero) in
+        VLocation a
+      | _ ->
+        assert false (* By typing. *)
+    end
 
   | Assign (_,_) -> failwith "Students! This is your job Assign expr!"
 
