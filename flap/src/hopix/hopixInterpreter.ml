@@ -380,7 +380,9 @@ and expression _ environment memory = function
 
   | Field (_,_) -> failwith "Students! This is your job Field expr!"
 
-  | Define (_,_) -> failwith "Students! This is your job Define expr!"
+  | Define (vd,e) -> 
+    let runtime = value_definition environment memory vd in
+    expression (Position.position e) runtime memory (Position.value e)
 
   | Ref _ -> failwith "Students! This is your job Ref expr!"
 
