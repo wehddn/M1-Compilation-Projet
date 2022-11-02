@@ -390,7 +390,14 @@ and expression _ environment memory = function
       let a = Memory.allocate memory 1L el in
       VLocation a
 
-  | Assign (_,_) -> failwith "Students! This is your job Assign expr!"
+  | Assign (e1,e2) -> 
+    let e1 = expression' environment memory e1 in
+    let e2 = expression' environment memory e2 in(
+      match e1 with
+      | VLocation a -> 
+        let da = Memory.dereference memory a in 
+        let dw = Memory.write da 0L e2 
+        in e2 )
 
   | Read (e) ->
     let e = expression' environment memory e in(
