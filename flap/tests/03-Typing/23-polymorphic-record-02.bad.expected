@@ -1,0 +1,2 @@
+Error (typechecking)
+  The field `x` as type `int' while it should have type `string'.
