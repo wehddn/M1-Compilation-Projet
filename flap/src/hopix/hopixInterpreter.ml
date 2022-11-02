@@ -386,16 +386,9 @@ and expression _ environment memory = function
     expression (Position.position e) runtime memory (Position.value e)
 
   | Ref e -> 
-  begin match expression' environment memory e with
-      | VInt x ->
-        let a = Memory.allocate memory x (VInt Int64.zero) in
-        VLocation a
-      | VString x ->
-        let a = Memory.allocate memory (Int64.of_int(String.length x)) (VInt Int64.zero) in
-        VLocation a
-      | _ ->
-        assert false (* By typing. *)
-    end
+      let el = expression' environment memory e in
+      let a = Memory.allocate memory 1L el in
+      VLocation a
 
   | Assign (_,_) -> failwith "Students! This is your job Assign expr!"
 
