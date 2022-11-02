@@ -390,9 +390,26 @@ and expression _ environment memory = function
 
   | Case (_,_) -> failwith "Students! This is your job Case expr!"
 
-  | IfThenElse (_,_,_) -> failwith "Students! This is your job IfThenElse expr!"
+  | IfThenElse (c, t, f) ->
+    let v = expression' environment memory c in
+    begin match value_as_bool v with
+      | true -> expression' environment memory t
+      | false -> expression' environment memory f
+    end
 
-  | While (_,_) -> failwith "Students! This is your job While expr!"
+    | While (c, e) ->
+      let rec aux () =
+        let v = expression' environment memory c in 
+        match value_as_bool v  with
+          | true ->
+            ignore (expression' environment memory e);
+            aux ()
+          | false ->
+            VUnit
+          | _ ->
+            assert false (* By typing. *)
+      in
+      aux ()
 
   | For (_,_,_,_) -> failwith "Students! This is your job For expr!"
 
