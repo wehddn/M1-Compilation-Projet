@@ -350,7 +350,8 @@ and expression _ environment memory = function
     begin match expression' environment memory a with
       | VPrimitive (_, f) ->
         f memory vb
-      | VClosure (env,p,e) -> failwith "Students! This is your job expr - VClosure apply!"
+(*      | VClosure (env,p,e) -> expression' env memory e  *)
+        | VClosure (env,p,e) -> failwith "Students! This is your job expr - VClosure!"
       | _ -> failwith "Students! This is your job expr - apply!"
     end
   
@@ -406,7 +407,14 @@ and expression _ environment memory = function
         let da = Memory.dereference memory a in 
         Memory.read da 0L )
     
-  | Case (_,_) -> failwith "Students! This is your job Case expr!"
+  | Case (e,b) -> 
+      let v = expression' environment memory e in
+      let rec aux(b) =
+      (match b with
+        | [] -> VUnit
+        | v :: r -> let Branch(x,y) = v.value in aux(r)
+        | (branches, env)::[] -> matchpatern
+      ) in aux(b)
 
   | IfThenElse (c, t, f) ->
     let v = expression' environment memory c in
@@ -429,9 +437,7 @@ and expression _ environment memory = function
       in
       aux ()
 
-  | For (_,_,_,_) -> failwith "Students! This is your job For expr!"
-
-  | TypeAnnotation (_,_) -> failwith "Students! This is your job TypeAnnotation expr!"
+  | For (x,e,_,_) -> expression' environment memory e
 
   | _ -> failwith "Students! This is your job expr!"
 
