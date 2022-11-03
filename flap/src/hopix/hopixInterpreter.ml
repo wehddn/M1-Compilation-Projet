@@ -379,7 +379,12 @@ and expression _ environment memory = function
     let vt = List.map (expression' environment memory) t in
     VTuple(vt)
 
-  | Field (_,_) -> failwith "Students! This is your job Field expr!"
+  | Field (e,l) -> 
+    let v = expression' environment memory e in(
+    match v with
+    | VRecord list -> 
+      let vi = List.assoc (Position.value l ) list in
+      vi)
 
   | Define (vd,e) -> 
     let runtime = value_definition environment memory vd in
@@ -406,8 +411,22 @@ and expression _ environment memory = function
         let da = Memory.dereference memory a in 
         Memory.read da 0L )
     
-  | Case (_,_) -> failwith "Students! This is your job Case expr!"
-
+  | Case (e,b) -> failwith "todo case"
+    (*
+    let v = expression' environment memory e in
+    let rec aux(b) = 
+      match b with
+      |[] -> VUnit
+      | v::r -> 
+        let Branch(pattern,expr) =  v.value in
+        let (branches,env) =  
+        
+        if branches then
+          expression' environment expression env
+        else
+          aux(r)
+        *)
+ 
   | IfThenElse (c, t, f) ->
     let v = expression' environment memory c in
     begin match value_as_bool v with
@@ -429,7 +448,24 @@ and expression _ environment memory = function
       in
       aux ()
 
-  | For (_,_,_,_) -> failwith "Students! This is your job For expr!"
+  | For (x,e1,e2,e3) -> failwith("TODO FOR")
+    (*let rec aux(g) =  
+      let v = expression' environment memory g in
+      let c = expression' environment memory e2 in
+      let new_environment = bind_identifier environment x v in
+      match v < c with
+        | true -> 
+          ignore(expression' new_environment memory e3);
+          let vint = v in 
+          let g2 =  VInt(Int64.add vint 1L) in
+          aux(g2)
+        | false -> 
+          VUnit
+        | _ -> 
+          assert false (* By typing. *)
+      in 
+    aux(e1)*)
+      
 
   | TypeAnnotation (_,_) -> failwith "Students! This is your job TypeAnnotation expr!"
 
