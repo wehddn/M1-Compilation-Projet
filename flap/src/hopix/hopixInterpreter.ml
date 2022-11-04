@@ -414,22 +414,6 @@ and expression _ environment memory = function
         Memory.read da 0L 
       | _ -> failwith "Read error"
       end
-    
-  | Case (e,b) -> failwith "todo case"
-    (*
-    let v = expression' environment memory e in
-    let rec aux(b) = 
-      match b with
-      |[] -> VUnit
-      | v::r -> 
-        let Branch(pattern,expr) =  v.value in
-        let (branches,env) =  
-        
-        if branches then
-          expression' environment expression env
-        else
-          aux(r)
-        *)
  
   | IfThenElse (c, t, f) ->
     let v = expression' environment memory c in
@@ -467,8 +451,82 @@ and expression _ environment memory = function
           assert false (* By typing. *)
       in 
     aux(e1)*)
+
+  | Case (e,branches) -> 
+    let a = expression' environment memory e in
+    let rec aux b =
+      match b with
+      | [] -> VUnit
+      | v::r ->
+        let Branch(pattern,expr) = v.value in
+        let (b,env) = patternM environment memory a (pattern.value) in
+        if b
+          then expression' env memory expr
+      else aux r
+    in aux branches
       
   | _ -> failwith "Students! This is your job expr!"
+
+and patternM env memory e pattern : bool*Environment.t =
+  
+  match pattern with
+  | PVariable id-> 
+    let new_env = Environment.bind env (Position.value id) e in
+    (true,new_env)
+
+  | PWildcard ->
+    (true,env)
+
+  | PTypeAnnotation(pat,ty)->
+    patternM env memory e (Position.value pat)
+
+  | PLiteral l->
+    begin
+    match Position.value l,e with
+    | LInt i1, VInt i2 -> (i1=i2,env)
+    | LChar c1, VChar c2 -> (c1=c2,env)
+    | LString s1, VString s2 -> (s1=s2,env)
+    | _,_ -> (false,env)
+    end
+  
+  | PTaggedValue(constructor,tyl,patternl)->
+    failwith("TODO PTAGGEDVALUE")
+
+  | PRecord(list,tyl) ->
+    failwith("TODO PRECORD")
+
+  | PTuple(patternlist) ->
+    let rec aux patternlist env =
+      begin
+      match patternlist with
+      | [] -> (true,env)
+      | h::q -> 
+        let (b,new_env) = patternM env memory e (Position.value h) in
+        if b then aux q new_env else (false,new_env)
+      end
+      in aux patternlist env
+
+  | POr(patternlist)  ->
+    let rec aux patternlist env =
+    begin
+    match patternlist with
+    | [] -> (false,env)
+    | h::q -> 
+      let (b,new_env) = patternM env memory e (Position.value h) in
+      if b then (true,new_env) else aux q new_env
+    end
+    in aux patternlist env
+
+  | PAnd(patternlist)  ->
+    let rec aux patternlist env =
+      begin
+      match patternlist with
+      | [] -> (true,env)
+      | h::q -> 
+        let (b,new_env) = patternM env memory e (Position.value h) in
+        if b then aux q new_env else (false,new_env)
+      end
+      in aux patternlist env
 
 and literal = function
   | LInt x -> VInt x
@@ -506,3 +564,4 @@ and extract_observable runtime runtime' =
 (** This function displays a difference between two runtimes. *)
 let print_observable (_ : runtime) observation =
   Environment.print observation.new_memory observation.new_environment
+
