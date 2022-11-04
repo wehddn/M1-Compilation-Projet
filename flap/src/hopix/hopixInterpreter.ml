@@ -350,8 +350,9 @@ and expression _ environment memory = function
     begin match expression' environment memory a with
       | VPrimitive (_, f) ->
         f memory vb
-(*      | VClosure (env,p,e) -> expression' env memory e  *)
-        | VClosure (env,p,e) -> failwith "Students! This is your job expr - VClosure!"
+      | VClosure (env,p,e) -> 
+        let (b,run) = patternM env vb (Position.value p) in
+          expression' run memory e
       | _ -> failwith "Students! This is your job expr - apply!"
     end
   
@@ -459,7 +460,7 @@ and expression _ environment memory = function
       | [] -> VUnit
       | v::r ->
         let Branch(pattern,expr) = v.value in
-        let (b,env) = patternM environment memory a (pattern.value) in
+        let (b,env) = patternM environment a (pattern.value) in
         if b
           then expression' env memory expr
       else aux r
@@ -467,7 +468,7 @@ and expression _ environment memory = function
       
   | _ -> failwith "Students! This is your job expr!"
 
-and patternM env memory e pattern : bool*Environment.t =
+and patternM env e pattern : bool*Environment.t =
   
   match pattern with
   | PVariable id-> 
@@ -478,7 +479,7 @@ and patternM env memory e pattern : bool*Environment.t =
     (true,env)
 
   | PTypeAnnotation(pat,ty)->
-    patternM env memory e (Position.value pat)
+    patternM env e (Position.value pat)
 
   | PLiteral l->
     begin
@@ -489,8 +490,21 @@ and patternM env memory e pattern : bool*Environment.t =
     | _,_ -> (false,env)
     end
   
-  | PTaggedValue(constructor,tyl,patternl)->
-    failwith("TODO PTAGGEDVALUE")
+  | PTaggedValue(cons,tyl,pattern_list)->
+    let VTagged(cons2,expr_list) = e in
+    if ((Position.value cons) <> cons2) then (false,env)
+    else
+      let pattern_list = List.map (Position.value) pattern_list in 
+      if(List.length pattern_list <> List.length expr_list) then (false,env)
+      else
+      let rec aux pattern_list expr_list env = 
+        begin match pattern_list,expr_list with
+        | [],[] -> (true,env)
+        | p::r, e::r2 -> 
+          let (b,env) = patternM env e p in
+          if b then aux r r2 env else (false,env)
+        end in 
+      aux pattern_list expr_list env
 
   | PRecord(list,tyl) ->
     failwith("TODO PRECORD")
@@ -501,7 +515,7 @@ and patternM env memory e pattern : bool*Environment.t =
       match patternlist with
       | [] -> (true,env)
       | h::q -> 
-        let (b,new_env) = patternM env memory e (Position.value h) in
+        let (b,new_env) = patternM env e (Position.value h) in
         if b then aux q new_env else (false,new_env)
       end
       in aux patternlist env
@@ -512,7 +526,7 @@ and patternM env memory e pattern : bool*Environment.t =
     match patternlist with
     | [] -> (false,env)
     | h::q -> 
-      let (b,new_env) = patternM env memory e (Position.value h) in
+      let (b,new_env) = patternM env e (Position.value h) in
       if b then (true,new_env) else aux q new_env
     end
     in aux patternlist env
@@ -523,7 +537,7 @@ and patternM env memory e pattern : bool*Environment.t =
       match patternlist with
       | [] -> (true,env)
       | h::q -> 
-        let (b,new_env) = patternM env memory e (Position.value h) in
+        let (b,new_env) = patternM env e (Position.value h) in
         if b then aux q new_env else (false,new_env)
       end
       in aux patternlist env
