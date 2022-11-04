@@ -467,9 +467,6 @@ and expression _ environment memory = function
       in 
     aux(e1)*)
       
-
-  | TypeAnnotation (_,_) -> failwith "Students! This is your job TypeAnnotation expr!"
-
   | _ -> failwith "Students! This is your job expr!"
 
 and literal = function
