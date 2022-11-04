@@ -382,12 +382,9 @@ and expression _ environment memory = function
 
   | Field (e,l) -> 
     let v = expression' environment memory e in
-    begin match v with
-    | VRecord list -> 
-      let vi = List.assoc (Position.value l ) list in
-      vi
-    | _ -> failwith "field error"
-    end
+    let VRecord list = v in
+    let vi = List.assoc (Position.value l ) list in
+    vi
 
   | Define (vd,e) -> 
     let runtime = value_definition environment memory vd in
