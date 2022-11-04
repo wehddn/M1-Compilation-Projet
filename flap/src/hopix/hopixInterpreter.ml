@@ -365,7 +365,7 @@ and expression _ environment memory = function
   | Literal l ->
     literal (Position.value l)
 
-  | Tagged (c, ty, el) -> 
+  | Tagged (c, _, el) -> 
     let vc = Position.value c in
     let vel = List.map (expression' environment memory) el in
     VTagged(vc, vel)
@@ -381,11 +381,13 @@ and expression _ environment memory = function
     VTuple(vt)
 
   | Field (e,l) -> 
-    let v = expression' environment memory e in(
-    match v with
+    let v = expression' environment memory e in
+    begin match v with
     | VRecord list -> 
       let vi = List.assoc (Position.value l ) list in
-      vi)
+      vi
+    | _ -> failwith "field error"
+    end
 
   | Define (vd,e) -> 
     let runtime = value_definition environment memory vd in
@@ -398,19 +400,23 @@ and expression _ environment memory = function
 
   | Assign (e1,e2) -> 
     let e1 = expression' environment memory e1 in
-    let e2 = expression' environment memory e2 in(
-      match e1 with
+    let e2 = expression' environment memory e2 in
+      begin match e1 with
       | VLocation a -> 
-        let da = Memory.dereference memory a in 
-        let dw = Memory.write da 0L e2 
-        in e2 )
+        let da = Memory.dereference memory a in
+        (Memory.write da 0L e2); 
+        e2 
+      | _ -> failwith "Assign error"
+      end
 
   | Read (e) ->
-    let e = expression' environment memory e in(
-      match e with
+    let e = expression' environment memory e in
+      begin match e with
       | VLocation a -> 
         let da = Memory.dereference memory a in 
-        Memory.read da 0L )
+        Memory.read da 0L 
+      | _ -> failwith "Read error"
+      end
     
   | Case (e,b) -> failwith "todo case"
     (*
@@ -444,8 +450,6 @@ and expression _ environment memory = function
             aux ()
           | false ->
             VUnit
-          | _ ->
-            assert false (* By typing. *)
       in
       aux ()
 
