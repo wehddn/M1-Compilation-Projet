@@ -331,16 +331,16 @@ and value_definition environment memory = function
     let v = expression' environment memory e in 
     bind_identifier environment x v
   | RecFunctions rf -> 
-    let rec aux rf = 
+    let rec aux rf environment = 
     begin match rf with
       | [] -> environment
       | (id,_, FunctionDefinition(pattern, expr))::t -> 
         let closure = VClosure (environment, pattern, expr) in
-        let _ = bind_identifier environment id closure in
-        aux t
+        let environment = Environment.bind environment (Position.value id) closure in
+        aux t environment
       end
     in
-    aux rf
+    aux rf environment
     
     (*let ((id,_, FunctionDefinition(pattern, expr))::t) = rf in
     let closure = VClosure (environment, pattern, expr) in
