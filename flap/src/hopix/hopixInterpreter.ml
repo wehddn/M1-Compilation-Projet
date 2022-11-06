@@ -365,8 +365,9 @@ and expression _ environment memory = function
       | VPrimitive (_, f) ->
         f memory vb
       | VClosure (env,p,e) -> 
-        let (b,run) = patternM env vb (Position.value p) in
+        let (_,run) = patternM env vb (Position.value p) in
           expression' run memory e
+      | VTuple _ -> failwith "Students! This is your job expr - apply Vtuple!"
       | _ -> failwith "Students! This is your job expr - apply!"
     end
   
@@ -492,7 +493,7 @@ and patternM env e pattern : bool*Environment.t =
   | PWildcard ->
     (true,env)
 
-  | PTypeAnnotation(pat,ty)->
+  | PTypeAnnotation(pat,_)->
     patternM env e (Position.value pat)
 
   | PLiteral l->
@@ -504,8 +505,10 @@ and patternM env e pattern : bool*Environment.t =
     | _,_ -> (false,env)
     end
   
-  | PTaggedValue(cons,tyl,pattern_list)->
-    let VTagged(cons2,expr_list) = e in
+  | PTaggedValue(cons,_,pattern_list)->
+  begin
+    match e with
+    | VTagged(cons2,expr_list) ->
     if ((Position.value cons) <> cons2) then (false,env)
     else
       let pattern_list = List.map (Position.value) pattern_list in 
@@ -519,8 +522,9 @@ and patternM env e pattern : bool*Environment.t =
           if b then aux r r2 env else (false,env)
         end in 
       aux pattern_list expr_list env
-
-  | PRecord(list,tyl) ->
+    | _ -> failwith "Pattern - PTaggedValue error"
+  end
+  | PRecord(_,_) ->
     failwith("TODO PRECORD")
 
   | PTuple(patternlist) ->
