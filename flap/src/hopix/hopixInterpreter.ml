@@ -330,7 +330,21 @@ and value_definition environment memory = function
   | SimpleValue (x, _, e) -> 
     let v = expression' environment memory e in 
     bind_identifier environment x v
-  | RecFunctions _ -> failwith "Students! This is your job (RecFunctions)!"
+  | RecFunctions rf -> 
+    let rec aux rf = 
+    begin match rf with
+      | [] -> environment
+      | (id,_, FunctionDefinition(pattern, expr))::t -> 
+        let closure = VClosure (environment, pattern, expr) in
+        let _ = bind_identifier environment id closure in
+        aux t
+      end
+    in
+    aux rf
+    
+    (*let ((id,_, FunctionDefinition(pattern, expr))::t) = rf in
+    let closure = VClosure (environment, pattern, expr) in
+    bind_identifier environment id closure*)
 
 and bind_identifier environment x v =
   Environment.bind environment (Position.value x) v
