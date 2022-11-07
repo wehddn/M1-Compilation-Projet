@@ -336,8 +336,9 @@ and value_definition environment memory = function
       | [] -> environment
       | (id,_, FunctionDefinition(pattern, expr))::t -> 
         let closure = VClosure (environment, pattern, expr) in
-        let environment = Environment.bind environment (Position.value id) closure in
-        aux t environment
+        try Environment.update (Position.position id) (Position.value id) environment closure; aux t environment
+        with Environment.UnboundIdentifier _ -> let environment = bind_identifier environment id closure in
+      aux t environment 
       end
     in
     aux rf environment
