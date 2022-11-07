@@ -365,7 +365,7 @@ and expression _ environment memory = function
     begin match expression' environment memory a with
       | VPrimitive (_, f) ->
         f memory vb
-      | VClosure (env,p,e) -> 
+      | VClosure (_,p,e) -> 
         let (_,env) = patternM environment vb (Position.value p) in
           expression' env memory e
       | VTuple _ -> failwith "Students! This is your job expr - apply Vtuple!"
@@ -377,7 +377,7 @@ and expression _ environment memory = function
 
   | Sequence(ls) ->
     let vs = List.map (expression' environment memory) ls in
-    List.(hd (rev vs))
+    List.(hd vs)
 
   | Literal l ->
     literal (Position.value l)
@@ -399,9 +399,10 @@ and expression _ environment memory = function
 
   | Field (e,l) -> 
     let v = expression' environment memory e in
-    let VRecord list = v in
-    let vi = List.assoc (Position.value l ) list in
-    vi
+    begin match v with 
+    | VRecord list -> let vi = List.assoc (Position.value l ) list in vi
+    | _ -> assert false
+    end
 
   | Define (vd,e) -> 
     let runtime = value_definition environment memory vd in
@@ -453,15 +454,17 @@ and expression _ environment memory = function
 
     | For (x,e1,e2,e3) ->
     let rec aux(env) =
-      let VInt v = Environment.lookup x.position x.value env in
-      let VInt c = expression' env memory e2 in
-          match v <= c with
-            | true ->
-                ignore(expression' env memory e3);
-                let ipp = VInt (Mint.of_int (Mint.to_int v + 1)) in
-                Environment.update x.position x.value env ipp;
-                aux env
-            | false -> VUnit
+      let en = Environment.lookup x.position x.value env in
+      let e = expression' env memory e2 in
+      match en, e with
+        | VInt v, VInt c ->
+          if v <= c then
+            (ignore(expression' env memory e3);
+            let ipp = VInt (Mint.of_int (Mint.to_int v + 1)) in
+            Environment.update x.position x.value env ipp;
+            aux env)
+            else VUnit
+        | _,_ -> assert false
           in 
     let i = expression' environment memory e1 in
     let env = bind_identifier environment x i in 
@@ -510,14 +513,13 @@ and patternM env e pattern : bool*Environment.t =
     if ((Position.value cons) <> cons2) then (false,env)
     else
       let pattern_list = List.map (Position.value) pattern_list in 
-      if(List.length pattern_list <> List.length expr_list) then (false,env)
-      else
       let rec aux pattern_list expr_list env = 
         begin match pattern_list,expr_list with
         | [],[] -> (true,env)
         | p::r, e::r2 -> 
           let (b,env) = patternM env e p in
           if b then aux r r2 env else (false,env)
+        | _,_ -> assert false
         end in 
       aux pattern_list expr_list env
     | _ -> failwith "Pattern - PTaggedValue error"
