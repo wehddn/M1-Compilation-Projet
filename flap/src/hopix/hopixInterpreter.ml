@@ -366,8 +366,8 @@ and expression _ environment memory = function
       | VPrimitive (_, f) ->
         f memory vb
       | VClosure (env,p,e) -> 
-        let (_,run) = patternM env vb (Position.value p) in
-          expression' run memory e
+        let (_,env) = patternM environment vb (Position.value p) in
+          expression' env memory e
       | VTuple _ -> failwith "Students! This is your job expr - apply Vtuple!"
       | _ -> failwith "Students! This is your job expr - apply!"
     end
@@ -485,7 +485,6 @@ and expression _ environment memory = function
   | _ -> failwith "Students! This is your job expr!"
 
 and patternM env e pattern : bool*Environment.t =
-  
   match pattern with
   | PVariable id-> 
     let new_env = Environment.bind env (Position.value id) e in
