@@ -368,8 +368,9 @@ and expression _ environment memory = function
       | VClosure (_,p,e) -> 
         let (_,env) = patternM environment vb (Position.value p) in
           expression' env memory e
-      | VTuple _ -> failwith "Students! This is your job expr - apply Vtuple!"
-      | _ -> failwith "Students! This is your job expr - apply!"
+      | _ -> match Position.value a with
+        | Apply (a1,b2) -> failwith "Students! This is your job expr - apply tuple!"
+        | _ -> failwith "Apply error!"
     end
   
   | Variable (x, _) ->
