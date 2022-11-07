@@ -451,23 +451,21 @@ and expression _ environment memory = function
       in
       aux ()
 
-  | For (x,e1,e2,e3) -> failwith("TODO FOR")
-    (*let rec aux(g) =  
-      let v = expression' environment memory g in
-      let c = expression' environment memory e2 in
-      let new_environment = bind_identifier environment x v in
-      match v < c with
-        | true -> 
-          ignore(expression' new_environment memory e3);
-          let vint = v in 
-          let g2 =  VInt(Int64.add vint 1L) in
-          aux(g2)
-        | false -> 
-          VUnit
-        | _ -> 
-          assert false (* By typing. *)
-      in 
-    aux(e1)*)
+    | For (x,e1,e2,e3) ->
+    let rec aux(env) =
+      let VInt v = Environment.lookup x.position x.value env in
+      let VInt c = expression' env memory e2 in
+          match v <= c with
+            | true ->
+                ignore(expression' env memory e3);
+                let ipp = VInt (Mint.of_int (Mint.to_int v + 1)) in
+                Environment.update x.position x.value env ipp;
+                aux env
+            | false -> VUnit
+          in 
+    let i = expression' environment memory e1 in
+    let env = bind_identifier environment x i in 
+    aux(env) 
 
   | Case (e,branches) -> 
     let a = expression' environment memory e in
