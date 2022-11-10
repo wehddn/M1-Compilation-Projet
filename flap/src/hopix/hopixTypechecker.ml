@@ -221,8 +221,13 @@ let typecheck tenv ast : typing_environment =
     check_expected_type pos xty ity
 
   (** [type_of_expression tenv pos e] computes a type for [e] if it exists. *)
-  and type_of_expression tenv pos : expression -> aty =
-failwith "Students! This is your job!"
+  and type_of_expression tenv pos : expression -> aty = function
+    | Literal x -> 
+      begin match (Position.value x) with
+        | LInt _ -> hint
+        | LString _ -> hstring
+        | LChar _ -> hchar
+      end
 
   and patterns tenv = function
     | [] ->
