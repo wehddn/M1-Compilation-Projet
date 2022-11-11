@@ -228,6 +228,23 @@ let typecheck tenv ast : typing_environment =
         | LString _ -> hstring
         | LChar _ -> hchar
       end
+  | Variable _ -> failwith "Students! This is your job! Variable"
+  | Tagged _ -> failwith "Students! This is your job! Tagged"
+  | Record _ -> failwith "Students! This is your job! Record" 
+  | Field _ -> failwith "Students! This is your job! Field"
+  | Tuple _ -> failwith "Students! This is your job! Tuple"
+  | Sequence _ -> failwith "Students! This is your job! Sequence"
+  | Define _ -> failwith "Students! This is your job! Define"
+  | Fun _ -> failwith "Students! This is your job! Fun"
+  | Apply _ -> failwith "Students! This is your job! Apply"
+  | Ref _ -> failwith "Students! This is your job! Ref"
+  | Assign _ -> failwith "Students! This is your job! Assign"
+  | Read _ -> failwith "Students! This is your job! Read"
+  | Case _ -> failwith "Students! This is your job! Case"
+  | IfThenElse _ -> failwith "Students! This is your job! IfThenElse"
+  | While _ -> failwith "Students! This is your job! While"
+  | For _ -> failwith "Students! This is your job! For"
+  | TypeAnnotation _ -> failwith "Students! This is your job! TypeAnnotation"
 
   and patterns tenv = function
     | [] ->
