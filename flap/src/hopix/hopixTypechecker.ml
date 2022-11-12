@@ -266,7 +266,9 @@ let typecheck tenv ast : typing_environment =
     check_expected_type (Position.position e2) r1 t2; r2
   | Ref e -> let t = type_of_expression tenv pos (Position.value e) in href t
   | Assign _ -> failwith "Students! This is your job! Assign"
-  | Read _ -> failwith "Students! This is your job! Read"
+  | Read e -> 
+    let t1 = type_of_expression tenv pos (Position.value e) in
+    type_of_reference_type t1
   | Case _ -> failwith "Students! This is your job! Case"
   | IfThenElse (e1,e2,e3) ->
     let t1 = type_of_expression tenv pos (Position.value e1) in
