@@ -250,7 +250,13 @@ let typecheck tenv ast : typing_environment =
   | Record _ -> failwith "Students! This is your job! Record" 
   | Field _ -> failwith "Students! This is your job! Field"
   | Tuple _ -> failwith "Students! This is your job! Tuple"
-  | Sequence _ -> failwith "Students! This is your job! Sequence"
+  | Sequence s1 -> 
+    begin match s1 with
+    | e1::e2::[] -> 
+      let t1 = type_of_expression tenv pos (Position.value e1) in
+      let t2 = type_of_expression tenv pos (Position.value e2) in
+      t1
+    end 
   | Define _ -> failwith "Students! This is your job! Define"
   | Fun _ -> failwith "Students! This is your job! Fun"
   | Apply (e1,e2) -> 
@@ -262,9 +268,24 @@ let typecheck tenv ast : typing_environment =
   | Assign _ -> failwith "Students! This is your job! Assign"
   | Read _ -> failwith "Students! This is your job! Read"
   | Case _ -> failwith "Students! This is your job! Case"
-  | IfThenElse _ -> failwith "Students! This is your job! IfThenElse"
-  | While _ -> failwith "Students! This is your job! While"
-  | For _ -> failwith "Students! This is your job! For"
+  | IfThenElse (e1,e2,e3) ->
+    let t1 = type_of_expression tenv pos (Position.value e1) in
+    let t2 = type_of_expression tenv pos (Position.value e2) in
+    let t3 = type_of_expression tenv pos (Position.value e3) in
+    check_expected_type (Position.position e1) t1 hbool;
+    hunit
+  | While (e1,e2) ->
+    let t1 = type_of_expression tenv pos (Position.value e1) in
+    let t2 = type_of_expression tenv pos (Position.value e2) in
+    check_expected_type (Position.position e1) t1 hbool;
+    hunit
+  | For (id,e1,e2,e3) -> 
+    let t1 = type_of_expression tenv pos (Position.value e1) in
+    let t2 = type_of_expression tenv pos (Position.value e2) in
+    let t3 = type_of_expression tenv pos (Position.value e3) in
+    check_expected_type (Position.position e1) t1 hint;
+    check_expected_type (Position.position e2) t2 hint;
+    hunit
   | TypeAnnotation (e,ty) -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
