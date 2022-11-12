@@ -263,7 +263,9 @@ let typecheck tenv ast : typing_environment =
   | IfThenElse _ -> failwith "Students! This is your job! IfThenElse"
   | While _ -> failwith "Students! This is your job! While"
   | For _ -> failwith "Students! This is your job! For"
-  | TypeAnnotation _ -> failwith "Students! This is your job! TypeAnnotation"
+  | TypeAnnotation (e,ty) -> 
+    let t1 = type_of_expression tenv pos (Position.value e) in
+    check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
 
   and replaceAty (aty:aty) var (typ:aty) = 
     let (s, _) = (pretty_print_aty tenv.type_variables aty) in
