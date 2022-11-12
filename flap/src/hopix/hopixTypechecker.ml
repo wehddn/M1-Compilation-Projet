@@ -236,7 +236,10 @@ let typecheck tenv ast : typing_environment =
   | Sequence _ -> failwith "Students! This is your job! Sequence"
   | Define _ -> failwith "Students! This is your job! Define"
   | Fun _ -> failwith "Students! This is your job! Fun"
-  | Apply _ -> failwith "Students! This is your job! Apply"
+  | Apply (e1,e2) -> 
+    let t1 = type_of_expression tenv pos (Position.value e1) in
+    let t2 = type_of_expression tenv pos (Position.value e2) in
+    ATyArrow (t1,t2)
   | Ref _ -> failwith "Students! This is your job! Ref"
   | Assign _ -> failwith "Students! This is your job! Assign"
   | Read _ -> failwith "Students! This is your job! Read"
