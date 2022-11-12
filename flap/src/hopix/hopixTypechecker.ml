@@ -252,20 +252,23 @@ let typecheck tenv ast : typing_environment =
   | Tuple _ -> failwith "Students! This is your job! Tuple"
   | Sequence s1 -> 
     begin match s1 with
-    | e1::e2::[] -> 
+    | e1::[e2] -> 
       let t1 = type_of_expression tenv pos (Position.value e1) in
       let t2 = type_of_expression tenv pos (Position.value e2) in
       t1
+    | _ -> assert false
     end 
   | Define _ -> failwith "Students! This is your job! Define"
   | Fun _ -> failwith "Students! This is your job! Fun"
   | Apply (e1,e2) -> 
     let t1 = type_of_expression tenv pos (Position.value e1) in
     let t2 = type_of_expression tenv pos (Position.value e2) in
-    let ATyArrow (r1, r2) = t1 in
-    check_expected_type (Position.position e2) r1 t2; r2
+    begin match t1 with
+    | ATyArrow (r1, r2) -> check_expected_type (Position.position e2) r1 t2; r2
+    | _ -> assert false
+    end
   | Ref e -> let t = type_of_expression tenv pos (Position.value e) in href t
-  | Assign _ -> failwith "Students! This is your job! Assign"
+  | Assign (e1,e2) -> failwith "Students! This is your job! Assign"
   | Read e -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     type_of_reference_type t1
