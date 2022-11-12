@@ -256,7 +256,7 @@ let typecheck tenv ast : typing_environment =
     let t2 = type_of_expression tenv pos (Position.value e2) in
     let ATyArrow (r1, r2) = t1 in
     check_expected_type (Position.position e2) r1 t2; r2
-  | Ref _ -> failwith "Students! This is your job! Ref"
+  | Ref e -> let t = type_of_expression tenv pos (Position.value e) in href t
   | Assign _ -> failwith "Students! This is your job! Assign"
   | Read _ -> failwith "Students! This is your job! Read"
   | Case _ -> failwith "Students! This is your job! Case"
