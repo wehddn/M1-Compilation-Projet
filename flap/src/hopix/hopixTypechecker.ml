@@ -228,7 +228,7 @@ let typecheck tenv ast : typing_environment =
         | LString _ -> hstring
         | LChar _ -> hchar
       end
-  | Variable(id,ty_list) -> (
+    | Variable(id,ty_list) -> (
       try(
       let Scheme (vars, aty) = lookup_type_scheme_of_value (Position.position id) (Position.value id) tenv in
       begin match ty_list with
@@ -258,7 +258,10 @@ let typecheck tenv ast : typing_environment =
       t1
     | _ -> assert false
     end 
-  | Define _ -> failwith "Students! This is your job! Define"
+  | Define (v,e) -> 
+    let t1 = type_of_expression tenv pos (Position.value e) in 
+    let tv = value_definition tenv v in 
+    type_of_expression tv pos (Position.value e)
   | Fun _ -> failwith "Students! This is your job! Fun"
   | Apply (e1,e2) -> 
     let t1 = type_of_expression tenv pos (Position.value e1) in
