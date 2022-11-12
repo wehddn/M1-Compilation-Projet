@@ -228,7 +228,8 @@ let typecheck tenv ast : typing_environment =
         | LString _ -> hstring
         | LChar _ -> hchar
       end
-  | Variable(id,ty_list) -> 
+  | Variable(id,ty_list) -> (
+      try(
       let Scheme (vars, aty) = lookup_type_scheme_of_value (Position.position id) (Position.value id) tenv in
       begin match ty_list with
       | Some l -> 
@@ -244,6 +245,7 @@ let typecheck tenv ast : typing_environment =
         in aux liste_of_aty vars  aty
       | None -> aty
       end
+      ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
   | Tagged _ -> failwith "Students! This is your job! Tagged"
   | Record _ -> failwith "Students! This is your job! Record" 
   | Field _ -> failwith "Students! This is your job! Field"
