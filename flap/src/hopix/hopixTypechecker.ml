@@ -261,7 +261,7 @@ let typecheck tenv ast : typing_environment =
       the variables introduced by the pattern [p] as well as the type
       of this pattern. *)
   and pattern tenv pos =
-  failwith "Students! This is your job!"
+  failwith "Students! This is your job! Pattern"
   in
   program ast
 
