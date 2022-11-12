@@ -228,7 +228,22 @@ let typecheck tenv ast : typing_environment =
         | LString _ -> hstring
         | LChar _ -> hchar
       end
-  | Variable _ -> failwith "Students! This is your job! Variable"
+  | Variable(id,ty_list) -> 
+      let Scheme (vars, aty) = lookup_type_scheme_of_value (Position.position id) (Position.value id) tenv in
+      begin match ty_list with
+      | Some l -> 
+        let liste_of_aty = List.map (fun v -> aty_of_ty (Position.value v)) l in 
+        let rec aux vars ty_list atyAux =
+          begin match vars,ty_list with
+            | [],[] -> atyAux
+            | _,[] | [],_ -> failwith "erreur Variable"
+            | var::q1,typ::q2 -> 
+              let new_aty = replaceAty atyAux typ var in
+               aux q1 q2 new_aty
+          end
+        in aux liste_of_aty vars  aty
+      | None -> aty
+      end
   | Tagged _ -> failwith "Students! This is your job! Tagged"
   | Record _ -> failwith "Students! This is your job! Record" 
   | Field _ -> failwith "Students! This is your job! Field"
@@ -249,6 +264,14 @@ let typecheck tenv ast : typing_environment =
   | While _ -> failwith "Students! This is your job! While"
   | For _ -> failwith "Students! This is your job! For"
   | TypeAnnotation _ -> failwith "Students! This is your job! TypeAnnotation"
+
+  and replaceAty (aty:aty) var (typ:aty) = 
+    let (s, _) = (pretty_print_aty tenv.type_variables aty) in
+    match aty with
+        | ATyVar v ->  if v = var then typ else aty
+        | ATyTuple (l) -> ATyTuple (List.map (fun v -> replaceAty v var typ) l)
+        | ATyArrow (aty1, aty2) -> ATyArrow ((replaceAty aty1 var typ), (replaceAty aty2 var typ))
+        | _ -> aty
 
   and patterns tenv = function
     | [] ->
