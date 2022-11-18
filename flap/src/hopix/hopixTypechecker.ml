@@ -323,7 +323,9 @@ let typecheck tenv ast : typing_environment =
   and pattern tenv pos = function
     | PVariable (id) -> failwith "TODO PVariable"
     | PWildcard -> failwith "TODO PWild"
-    | PTypeAnnotation (pattern, ty) -> failwith "TODO PTypeAnnotation "
+    | PTypeAnnotation ({Position.value = PVariable x}, ty) -> 
+      let xty = internalize_ty tenv ty in
+      (bind_value (Position.value x) (monotype xty) tenv, xty) 
     | PLiteral (literal) -> failwith "TODO PLiteral"
     | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
     | PRecord (list, ty) -> failwith "TODO PRecord"
