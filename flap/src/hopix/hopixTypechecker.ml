@@ -271,7 +271,10 @@ let typecheck tenv ast : typing_environment =
     | _ -> assert false
     end
   | Ref e -> let t = type_of_expression tenv pos (Position.value e) in href t
-  | Assign (e1,e2) -> failwith "Students! This is your job! Assign"
+  | Assign (e1,e2) -> 
+    let ety = located (type_of_expression tenv) e1 in
+    let rty = type_of_reference_type ety in 
+    hunit
   | Read e -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     type_of_reference_type t1
@@ -324,8 +327,7 @@ let typecheck tenv ast : typing_environment =
     | PLiteral (literal) -> failwith "TODO PLiteral"
     | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
     | PRecord (list, ty) -> failwith "TODO PRecord"
-    | PTuple (pattern_list) -> 
-      match list with 
+    | PTuple (pattern_list) -> failwith "TODO POTuple"
     | POr (list) -> failwith "TODO POr"
     | PAnd (list) -> failwith "TODO PAnd"
   in
