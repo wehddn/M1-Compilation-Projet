@@ -317,8 +317,17 @@ let typecheck tenv ast : typing_environment =
   (** [pattern tenv pos p] computes a new environment completed with
       the variables introduced by the pattern [p] as well as the type
       of this pattern. *)
-  and pattern tenv pos =
-  failwith "Students! This is your job! Pattern"
+  and pattern tenv pos = function
+    | PVariable (id) -> failwith "TODO PVariable"
+    | PWildcard -> failwith "TODO PWild"
+    | PTypeAnnotation (pattern, ty) -> failwith "TODO PTypeAnnotation "
+    | PLiteral (literal) -> failwith "TODO PLiteral"
+    | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
+    | PRecord (list, ty) -> failwith "TODO PRecord"
+    | PTuple (pattern_list) -> 
+      match list with 
+    | POr (list) -> failwith "TODO POr"
+    | PAnd (list) -> failwith "TODO PAnd"
   in
   program ast
 
