@@ -330,7 +330,12 @@ let typecheck tenv ast : typing_environment =
   and pattern tenv pos = function
     | PVariable (id) -> failwith "TODO PVariable"
     | PWildcard -> failwith "TODO PWild"
-    | PTypeAnnotation ({Position.value = PVariable x}, ty) -> 
+    | PTypeAnnotation (p, ty) -> 
+      let x = 
+        begin match (Position.value p) with 
+        | PVariable v -> v 
+        | _ -> assert false
+      end in
       let xty = internalize_ty tenv ty in
       (bind_value (Position.value x) (monotype xty) tenv, xty) 
     | PLiteral (literal) -> failwith "TODO PLiteral"
