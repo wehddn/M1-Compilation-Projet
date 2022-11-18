@@ -262,7 +262,13 @@ let typecheck tenv ast : typing_environment =
     let t1 = type_of_expression tenv pos (Position.value e) in 
     let tv = value_definition tenv v in 
     type_of_expression tv pos (Position.value e)
-  | Fun _ -> failwith "Students! This is your job! Fun"
+  | Fun e -> 
+    begin match e with
+    | FunctionDefinition(p, e) -> 
+      let env, t1 = pattern tenv pos (Position.value p) in
+      let t2 = type_of_expression env pos (Position.value e) in
+      ATyArrow(t1,t2)
+  end
   | Apply (e1,e2) -> 
     let t1 = type_of_expression tenv pos (Position.value e1) in
     let t2 = type_of_expression tenv pos (Position.value e2) in
