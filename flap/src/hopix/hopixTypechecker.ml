@@ -246,10 +246,27 @@ let typecheck tenv ast : typing_environment =
       | None -> aty
       end
       ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
-  | Tagged _ -> failwith "Students! This is your job! Tagged"
+  
+      | Tagged(constructor,ty_list,expr_list) ->
+    let Scheme(vars,aty) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in
+    let expr_aty = List.map(fun v -> located(type_of_expression tenv) v) expr_list in
+    begin match ty_list with
+      | Some l -> let aty_list = List.map(fun v -> aty_of_ty (Position.value v)) l in 
+        failwith "TODO TAGGED"
+      | None -> aty
+    end
   | Record _ -> failwith "Students! This is your job! Record" 
-  | Field _ -> failwith "Students! This is your job! Field"
-  | Tuple _ -> failwith "Students! This is your job! Tuple"
+  | Field(label,expression)-> failwith "Students! This is your job! Field"
+  | Tuple(expr_list) -> 
+    let rec aux expr_list =
+      begin match expr_list with
+      | [] -> []
+      | h::q -> 
+        let ty = located (type_of_expression tenv) h in
+        let tys = aux q in
+        ty::tys 
+      end 
+      in ATyTuple(aux expr_list)
   | Sequence s1 -> 
     begin match s1 with
     | e1::[e2] -> 
@@ -329,7 +346,9 @@ let typecheck tenv ast : typing_environment =
     | PLiteral (literal) -> failwith "TODO PLiteral"
     | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
     | PRecord (list, ty) -> failwith "TODO PRecord"
-    | PTuple (pattern_list) -> failwith "TODO POTuple"
+    | PTuple (pattern_list) -> 
+      let (new_env, list) = patterns tenv pattern_list in
+      (new_env,ATyTuple(list))
     | POr (list) -> failwith "TODO POr"
     | PAnd (list) -> failwith "TODO PAnd"
   in
