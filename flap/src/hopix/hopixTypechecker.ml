@@ -295,14 +295,15 @@ let typecheck tenv ast : typing_environment =
     let t1 = type_of_expression tenv pos (Position.value e1) in
     let t2 = type_of_expression tenv pos (Position.value e2) in
     check_expected_type (Position.position e1) t1 hbool;
-    hunit
+    hint
   | For (id,e1,e2,e3) -> 
     let t1 = type_of_expression tenv pos (Position.value e1) in
     let t2 = type_of_expression tenv pos (Position.value e2) in
     let t3 = type_of_expression tenv pos (Position.value e3) in
+    let tenv = bind_value (Position.value id) (monotype hint) tenv in
     check_expected_type (Position.position e1) t1 hint;
     check_expected_type (Position.position e2) t2 hint;
-    hunit
+    hint
   | TypeAnnotation (e,ty) -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
@@ -335,7 +336,7 @@ let typecheck tenv ast : typing_environment =
     | PLiteral (literal) -> failwith "TODO PLiteral"
     | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
     | PRecord (list, ty) -> failwith "TODO PRecord"
-    | PTuple (pattern_list) -> failwith "TODO POTuple"
+    | PTuple (pattern_list) -> failwith "TODO PTuple"
     | POr (list) -> failwith "TODO POr"
     | PAnd (list) -> failwith "TODO PAnd"
   in
