@@ -323,7 +323,15 @@ let typecheck tenv ast : typing_environment =
   | Read e -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     type_of_reference_type t1
-  | Case _ -> failwith "Students! This is your job! Case"
+  | Case (e,b) -> (*failwith "Students! This is your job! Case"*)
+    let t = type_of_expression tenv pos (Position.value e) in
+    let rec aux b = begin match b with
+      | [] -> t 
+      | Branch(p, e)::bt -> 
+        let (penv, pt) = pattern tenv (Position.position p) (Position.value p) in
+        check_expected_type (Position.position p) t pt; aux bt 
+    end in
+    aux (List.map (fun x -> Position.value x) b)
   | IfThenElse (e1,e2,e3) ->
     let t1 = type_of_expression tenv pos (Position.value e1) in
     let t2 = type_of_expression tenv pos (Position.value e2) in
