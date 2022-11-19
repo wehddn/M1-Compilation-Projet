@@ -247,14 +247,29 @@ let typecheck tenv ast : typing_environment =
       end
       ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
   
-      | Tagged(constructor,ty_list,expr_list) ->
-    let Scheme(vars,aty) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in
-    let expr_aty = List.map(fun v -> located(type_of_expression tenv) v) expr_list in
-    begin match ty_list with
-      | Some l -> let aty_list = List.map(fun v -> aty_of_ty (Position.value v)) l in 
-        failwith "TODO TAGGED"
-      | None -> aty
-    end
+      | Tagged (constructor, ty, expressions) -> 
+        (
+            try (
+                let Scheme (vars, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
+                let exprs_aty = List.map (fun e -> 
+                    type_of_expression tenv (Position.position e) e.value
+                ) expressions in
+                let rec aux aty exprs_aty = (
+                    match aty,exprs_aty with 
+                    | ATyArrow (data, t), expr_aty :: r ->
+                            check_expected_type pos data expr_aty; 
+                            aux t r
+                    | t, _ :: _ -> 
+                      type_error pos "This expression cannot be applied. (Too many arguments?)"
+                    | t, _ -> t
+                ) in
+                aux typ exprs_aty      
+            )
+            with HopixTypes.UnboundConstructor -> (
+                let KId(constr_str) = constructor.value in 
+                type_error pos ("Unbound constructor `" ^ constr_str ^ "'.")
+            )
+        )
   | Record _ -> failwith "Students! This is your job! Record" 
 
   | Field(expression,label)->
@@ -335,7 +350,7 @@ let typecheck tenv ast : typing_environment =
     let tenv = bind_value (Position.value id) (monotype hint) tenv in
     check_expected_type (Position.position e1) t1 hint;
     check_expected_type (Position.position e2) t2 hint;
-    hint
+    t1
   | TypeAnnotation (e,ty) -> 
     let t1 = type_of_expression tenv pos (Position.value e) in
     check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
