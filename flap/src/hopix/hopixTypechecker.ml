@@ -279,7 +279,7 @@ let typecheck tenv ast : typing_environment =
     | e1::[e2] -> 
       let t1 = type_of_expression tenv pos (Position.value e1) in
       let t2 = type_of_expression tenv pos (Position.value e2) in
-      t1
+      t2
     | _ -> assert false
     end 
   | Define (v,e) -> 
@@ -300,7 +300,7 @@ let typecheck tenv ast : typing_environment =
     | ATyArrow (r1, r2) -> check_expected_type (Position.position e2) r1 t2; r2
     | _ -> assert false
     end
-  | Ref e -> let t = type_of_expression tenv pos (Position.value e) in href t
+  | Ref e -> let t = type_of_expression tenv (Position.position e) (Position.value e) in href t
   | Assign (e1,e2) -> 
     let ety = located (type_of_expression tenv) e1 in
     let rty = type_of_reference_type ety in 
@@ -370,7 +370,12 @@ let typecheck tenv ast : typing_environment =
       end in
       let xty = internalize_ty tenv ty in
       (bind_value (Position.value x) (monotype xty) tenv, xty) 
-    | PLiteral (literal) -> failwith "TODO PLiteral"
+    | PLiteral (literal) -> 
+      begin match (Position.value literal) with
+      | LInt _ -> (tenv, hint)
+      | LString _ -> (tenv, hstring)
+      | LChar _ -> (tenv, hchar)
+    end
     | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
     | PRecord (list, ty) -> failwith "TODO PRecord"
     | PTuple (pattern_list) -> 
