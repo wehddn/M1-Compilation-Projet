@@ -256,7 +256,14 @@ let typecheck tenv ast : typing_environment =
       | None -> aty
     end
   | Record _ -> failwith "Students! This is your job! Record" 
-  | Field(label,expression)-> failwith "Students! This is your job! Field"
+
+  | Field(expression,label)->
+    let Scheme(vars,aty) = lookup_type_scheme_of_label (Position.value label) tenv in 
+    begin match aty with
+    | ATyArrow(_,res) -> res
+    | _ -> assert false
+    end
+
   | Tuple(expr_list) -> 
     let rec aux expr_list =
       begin match expr_list with
