@@ -300,7 +300,6 @@ let typecheck tenv ast : typing_environment =
       end 
 
     | Define (v,e) -> 
-      let _ = type_of_expression tenv pos (Position.value e) in 
       let tv = value_definition tenv v in 
       type_of_expression tv pos (Position.value e)
 
