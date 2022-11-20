@@ -228,6 +228,7 @@ let typecheck tenv ast : typing_environment =
         | LString _ -> hstring
         | LChar _ -> hchar
       end
+
     | Variable(id,ty_list) -> (
       try(
       let Scheme (vars, aty) = lookup_type_scheme_of_value (Position.position id) (Position.value id) tenv in
@@ -247,113 +248,124 @@ let typecheck tenv ast : typing_environment =
       end
       ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
   
-      | Tagged (constructor, ty, expressions) -> 
-        (
-            try (
-                let Scheme (vars, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
-                let exprs_aty = List.map (fun e -> 
-                    type_of_expression tenv (Position.position e) e.value
-                ) expressions in
-                let rec aux aty exprs_aty = (
-                    match aty,exprs_aty with 
-                    | ATyArrow (data, t), expr_aty :: r ->
-                            check_expected_type pos data expr_aty; 
-                            aux t r
-                    | t, _ :: _ -> 
-                      type_error pos "This expression cannot be applied. (Too many arguments?)"
-                    | t, _ -> t
-                ) in
-                aux typ exprs_aty      
-            )
-            with HopixTypes.UnboundConstructor -> (
-                let KId(constr_str) = constructor.value in 
-                type_error pos ("Unbound constructor `" ^ constr_str ^ "'.")
-            )
-        )
-  | Record _ -> failwith "Students! This is your job! Record" 
+    | Tagged (constructor, ty, expressions) -> 
+      (
+          try (
+              let Scheme (vars, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
+              let exprs_aty = List.map (fun e -> 
+                  type_of_expression tenv (Position.position e) e.value
+              ) expressions in
+              let rec aux aty exprs_aty = (
+                  match aty,exprs_aty with 
+                  | ATyArrow (data, t), expr_aty :: r ->
+                          check_expected_type pos data expr_aty; 
+                          aux t r
+                  | t, _ :: _ -> 
+                    type_error pos "This expression cannot be applied. (Too many arguments?)"
+                  | t, _ -> t
+              ) in
+              aux typ exprs_aty      
+          )
+          with HopixTypes.UnboundConstructor -> (
+              let KId(constr_str) = constructor.value in 
+              type_error pos ("Unbound constructor `" ^ constr_str ^ "'.")
+          )
+      )
 
-  | Field(expression,label)->
-    let Scheme(vars,aty) = lookup_type_scheme_of_label (Position.value label) tenv in 
-    begin match aty with
-    | ATyArrow(_,res) -> res
-    | _ -> assert false
-    end
+    | Record _ -> failwith "Students! This is your job! Record" 
 
-  | Tuple(expr_list) -> 
-    let rec aux expr_list =
-      begin match expr_list with
-      | [] -> []
-      | h::q -> 
-        let ty = located (type_of_expression tenv) h in
-        let tys = aux q in
-        ty::tys 
+    | Field(expression,label)->
+      let Scheme(vars,aty) = lookup_type_scheme_of_label (Position.value label) tenv in 
+      begin match aty with
+      | ATyArrow(_,res) -> res
+      | _ -> assert false
+      end
+
+    | Tuple(expr_list) -> 
+      let rec aux expr_list =
+        begin match expr_list with
+        | [] -> []
+        | h::q -> 
+          let ty = located (type_of_expression tenv) h in
+          let tys = aux q in
+          ty::tys 
+        end 
+        in ATyTuple(aux expr_list)
+    | Sequence s1 -> 
+      begin match s1 with
+      | e1::[e2] -> 
+        let t1 = type_of_expression tenv pos (Position.value e1) in
+        let t2 = type_of_expression tenv pos (Position.value e2) in
+        t2
+      | _ -> assert false
       end 
-      in ATyTuple(aux expr_list)
-  | Sequence s1 -> 
-    begin match s1 with
-    | e1::[e2] -> 
+
+    | Define (v,e) -> 
+      let t1 = type_of_expression tenv pos (Position.value e) in 
+      let tv = value_definition tenv v in 
+      type_of_expression tv pos (Position.value e)
+
+    | Fun e -> 
+      begin match e with
+      | FunctionDefinition(p, e) -> 
+        let env, t1 = pattern tenv pos (Position.value p) in
+        let t2 = type_of_expression env pos (Position.value e) in
+        ATyArrow(t1,t2)
+      end
+
+    | Apply (e1,e2) -> 
       let t1 = type_of_expression tenv pos (Position.value e1) in
       let t2 = type_of_expression tenv pos (Position.value e2) in
-      t2
-    | _ -> assert false
-    end 
-  | Define (v,e) -> 
-    let t1 = type_of_expression tenv pos (Position.value e) in 
-    let tv = value_definition tenv v in 
-    type_of_expression tv pos (Position.value e)
-  | Fun e -> 
-    begin match e with
-    | FunctionDefinition(p, e) -> 
-      let env, t1 = pattern tenv pos (Position.value p) in
-      let t2 = type_of_expression env pos (Position.value e) in
-      ATyArrow(t1,t2)
-  end
-  | Apply (e1,e2) -> 
-    let t1 = type_of_expression tenv pos (Position.value e1) in
-    let t2 = type_of_expression tenv pos (Position.value e2) in
-    begin match t1 with
-    | ATyArrow (r1, r2) -> check_expected_type (Position.position e2) r1 t2; r2
-    | _ -> assert false
-    end
-  | Ref e -> let t = type_of_expression tenv (Position.position e) (Position.value e) in href t
-  | Assign (e1,e2) -> 
-    let ety = located (type_of_expression tenv) e1 in
-    let rty = type_of_reference_type ety in 
-    hunit
-  | Read e -> 
-    let t1 = type_of_expression tenv pos (Position.value e) in
-    type_of_reference_type t1
-  | Case (e,b) -> (*failwith "Students! This is your job! Case"*)
-    let t = type_of_expression tenv pos (Position.value e) in
-    let rec aux b = begin match b with
-      | [] -> t 
-      | Branch(p, e)::bt -> 
-        let (penv, pt) = pattern tenv (Position.position p) (Position.value p) in
-        check_expected_type (Position.position p) t pt; aux bt 
-    end in
-    aux (List.map (fun x -> Position.value x) b)
-  | IfThenElse (e1,e2,e3) ->
-    let t1 = type_of_expression tenv pos (Position.value e1) in
-    let t2 = type_of_expression tenv pos (Position.value e2) in
-    let t3 = type_of_expression tenv pos (Position.value e3) in
-    check_expected_type (Position.position e1) t1 hbool;
-    hunit
-  | While (e1,e2) ->
-    let t1 = type_of_expression tenv pos (Position.value e1) in
-    let t2 = type_of_expression tenv pos (Position.value e2) in
-    check_expected_type (Position.position e1) t1 hbool;
-    hint
-  | For (id,e1,e2,e3) -> 
-    let t1 = type_of_expression tenv pos (Position.value e1) in
-    let t2 = type_of_expression tenv pos (Position.value e2) in
-    let t3 = type_of_expression tenv pos (Position.value e3) in
-    let tenv = bind_value (Position.value id) (monotype hint) tenv in
-    check_expected_type (Position.position e1) t1 hint;
-    check_expected_type (Position.position e2) t2 hint;
-    t1
-  | TypeAnnotation (e,ty) -> 
-    let t1 = type_of_expression tenv pos (Position.value e) in
-    check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
+      begin match t1 with
+      | ATyArrow (r1, r2) -> check_expected_type (Position.position e2) r1 t2; r2
+      | _ -> assert false
+      end
+
+    | Ref e -> let t = type_of_expression tenv (Position.position e) (Position.value e) in href t
+    
+    | Assign (e1,e2) -> 
+      let ety = located (type_of_expression tenv) e1 in
+      let rty = type_of_reference_type ety in 
+      hunit
+
+    | Read e -> 
+      let t1 = type_of_expression tenv pos (Position.value e) in
+      type_of_reference_type t1
+
+    | Case (e,b) -> (*failwith "Students! This is your job! Case"*)
+      let t = type_of_expression tenv pos (Position.value e) in
+      let rec aux b = begin match b with
+        | [] -> t 
+        | Branch(p, e)::bt -> 
+          let (penv, pt) = pattern tenv (Position.position p) (Position.value p) in
+          check_expected_type (Position.position p) t pt; aux bt 
+      end in
+      aux (List.map (fun x -> Position.value x) b)
+
+    | IfThenElse (e1,e2,e3) ->
+      let t1 = type_of_expression tenv pos (Position.value e1) in
+      let t2 = type_of_expression tenv pos (Position.value e2) in
+      let t3 = type_of_expression tenv pos (Position.value e3) in
+      check_expected_type (Position.position e1) t1 hbool;
+      hunit
+    | While (e1,e2) ->
+      let t1 = type_of_expression tenv pos (Position.value e1) in
+      let t2 = type_of_expression tenv pos (Position.value e2) in
+      check_expected_type (Position.position e1) t1 hbool;
+      hint
+
+    | For (id,e1,e2,e3) -> 
+      let t1 = type_of_expression tenv pos (Position.value e1) in
+      let t2 = type_of_expression tenv pos (Position.value e2) in
+      let t3 = type_of_expression tenv pos (Position.value e3) in
+      let tenv = bind_value (Position.value id) (monotype hint) tenv in
+      check_expected_type (Position.position e1) t1 hint;
+      check_expected_type (Position.position e2) t2 hint;
+      t1
+
+    | TypeAnnotation (e,ty) -> 
+      let t1 = type_of_expression tenv pos (Position.value e) in
+      check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
 
   and replaceAty (aty:aty) var (typ:aty) = 
     let (s, _) = (pretty_print_aty tenv.type_variables aty) in
