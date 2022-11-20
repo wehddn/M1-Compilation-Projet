@@ -390,13 +390,13 @@ let typecheck tenv ast : typing_environment =
     | PVariable (id) -> failwith "TODO PVariable"
     | PWildcard -> failwith "TODO PWild"
     | PTypeAnnotation (p, ty) -> 
+      let aty = aty_of_ty (Position.value ty) in
       let x = 
         begin match (Position.value p) with 
-        | PVariable v -> v 
-        | _ -> assert false
+        | PVariable v -> bind_value (Position.value v) (monotype aty) tenv
+        | x -> tenv
       end in
-      let xty = internalize_ty tenv ty in
-      (bind_value (Position.value x) (monotype xty) tenv, xty) 
+      (x, aty)
     | PLiteral (literal) -> 
       begin match (Position.value literal) with
       | LInt _ -> (tenv, hint)
