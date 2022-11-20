@@ -342,20 +342,17 @@ let typecheck tenv ast : typing_environment =
 
     | IfThenElse (e1,e2,e3) ->
       let t1 = type_of_expression tenv pos (Position.value e1) in
-      let _ = type_of_expression tenv pos (Position.value e2) in
-      let _ = type_of_expression tenv pos (Position.value e3) in
       check_expected_type (Position.position e1) t1 hbool;
       hunit
+
     | While (e1,e2) ->
       let t1 = type_of_expression tenv pos (Position.value e1) in
-      let _ = type_of_expression tenv pos (Position.value e2) in
       check_expected_type (Position.position e1) t1 hbool;
       hint
 
     | For (id,e1,e2,e3) -> 
       let t1 = type_of_expression tenv pos (Position.value e1) in
       let t2 = type_of_expression tenv pos (Position.value e2) in
-      let _ = type_of_expression tenv pos (Position.value e3) in
       let _ = bind_value (Position.value id) (monotype hint) tenv in
       check_expected_type (Position.position e1) t1 hint;
       check_expected_type (Position.position e2) t2 hint;
@@ -366,7 +363,7 @@ let typecheck tenv ast : typing_environment =
       check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
 
   and replaceAty (aty:aty) var (typ:aty) = 
-    let (_, _) = (pretty_print_aty tenv.type_variables aty) in
+    let _ = (pretty_print_aty tenv.type_variables aty) in
     match aty with
         | ATyVar v ->  if v = var then typ else aty
         | ATyTuple (l) -> ATyTuple (List.map (fun v -> replaceAty v var typ) l)
