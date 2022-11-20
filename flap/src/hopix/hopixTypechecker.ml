@@ -248,10 +248,10 @@ let typecheck tenv ast : typing_environment =
       end
       ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
   
-    | Tagged (constructor, ty, expressions) -> 
+    | Tagged (constructor, _, expressions) -> 
       (
           try (
-              let Scheme (vars, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
+              let Scheme (_, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
               let exprs_aty = List.map (fun e -> 
                   type_of_expression tenv (Position.position e) e.value
               ) expressions in
@@ -260,7 +260,7 @@ let typecheck tenv ast : typing_environment =
                   | ATyArrow (data, t), expr_aty :: r ->
                           check_expected_type pos data expr_aty; 
                           aux t r
-                  | t, _ :: _ -> 
+                  | _, _ :: _ -> 
                     type_error pos "This expression cannot be applied. (Too many arguments?)"
                   | t, _ -> t
               ) in
@@ -274,8 +274,8 @@ let typecheck tenv ast : typing_environment =
 
     | Record _ -> failwith "Students! This is your job! Record" 
 
-    | Field(expression,label)->
-      let Scheme(vars,aty) = lookup_type_scheme_of_label (Position.value label) tenv in 
+    | Field(_,label)->
+      let Scheme(_,aty) = lookup_type_scheme_of_label (Position.value label) tenv in 
       begin match aty with
       | ATyArrow(_,res) -> res
       | _ -> assert false
@@ -293,15 +293,14 @@ let typecheck tenv ast : typing_environment =
         in ATyTuple(aux expr_list)
     | Sequence s1 -> 
       begin match s1 with
-      | e1::[e2] -> 
-        let t1 = type_of_expression tenv pos (Position.value e1) in
+      | _::[e2] -> 
         let t2 = type_of_expression tenv pos (Position.value e2) in
         t2
       | _ -> assert false
       end 
 
     | Define (v,e) -> 
-      let t1 = type_of_expression tenv pos (Position.value e) in 
+      let _ = type_of_expression tenv pos (Position.value e) in 
       let tv = value_definition tenv v in 
       type_of_expression tv pos (Position.value e)
 
@@ -323,9 +322,9 @@ let typecheck tenv ast : typing_environment =
 
     | Ref e -> let t = type_of_expression tenv (Position.position e) (Position.value e) in href t
     
-    | Assign (e1,e2) -> 
+    | Assign (e1,_) -> 
       let ety = located (type_of_expression tenv) e1 in
-      let rty = type_of_reference_type ety in 
+      let _ = type_of_reference_type ety in 
       hunit
 
     | Read e -> 
@@ -336,29 +335,29 @@ let typecheck tenv ast : typing_environment =
       let t = type_of_expression tenv pos (Position.value e) in
       let rec aux b = begin match b with
         | [] -> t 
-        | Branch(p, e)::bt -> 
-          let (penv, pt) = pattern tenv (Position.position p) (Position.value p) in
+        | Branch(p, _)::bt -> 
+          let (_, pt) = pattern tenv (Position.position p) (Position.value p) in
           check_expected_type (Position.position p) t pt; aux bt 
       end in
       aux (List.map (fun x -> Position.value x) b)
 
     | IfThenElse (e1,e2,e3) ->
       let t1 = type_of_expression tenv pos (Position.value e1) in
-      let t2 = type_of_expression tenv pos (Position.value e2) in
-      let t3 = type_of_expression tenv pos (Position.value e3) in
+      let _ = type_of_expression tenv pos (Position.value e2) in
+      let _ = type_of_expression tenv pos (Position.value e3) in
       check_expected_type (Position.position e1) t1 hbool;
       hunit
     | While (e1,e2) ->
       let t1 = type_of_expression tenv pos (Position.value e1) in
-      let t2 = type_of_expression tenv pos (Position.value e2) in
+      let _ = type_of_expression tenv pos (Position.value e2) in
       check_expected_type (Position.position e1) t1 hbool;
       hint
 
     | For (id,e1,e2,e3) -> 
       let t1 = type_of_expression tenv pos (Position.value e1) in
       let t2 = type_of_expression tenv pos (Position.value e2) in
-      let t3 = type_of_expression tenv pos (Position.value e3) in
-      let tenv = bind_value (Position.value id) (monotype hint) tenv in
+      let _ = type_of_expression tenv pos (Position.value e3) in
+      let _ = bind_value (Position.value id) (monotype hint) tenv in
       check_expected_type (Position.position e1) t1 hint;
       check_expected_type (Position.position e2) t2 hint;
       t1
@@ -368,7 +367,7 @@ let typecheck tenv ast : typing_environment =
       check_expected_type (Position.position e) t1 (aty_of_ty (Position.value ty)); t1
 
   and replaceAty (aty:aty) var (typ:aty) = 
-    let (s, _) = (pretty_print_aty tenv.type_variables aty) in
+    let (_, _) = (pretty_print_aty tenv.type_variables aty) in
     match aty with
         | ATyVar v ->  if v = var then typ else aty
         | ATyTuple (l) -> ATyTuple (List.map (fun v -> replaceAty v var typ) l)
@@ -387,14 +386,14 @@ let typecheck tenv ast : typing_environment =
       the variables introduced by the pattern [p] as well as the type
       of this pattern. *)
   and pattern tenv pos = function
-    | PVariable (id) -> failwith "TODO PVariable"
+    | PVariable _ -> failwith "TODO PVariable"
     | PWildcard -> failwith "TODO PWild"
     | PTypeAnnotation (p, ty) -> 
       let aty = aty_of_ty (Position.value ty) in
       let x = 
         begin match (Position.value p) with 
         | PVariable v -> bind_value (Position.value v) (monotype aty) tenv
-        | x -> tenv
+        | _ -> tenv
       end in
       (x, aty)
     | PLiteral (literal) -> 
@@ -403,13 +402,13 @@ let typecheck tenv ast : typing_environment =
       | LString _ -> (tenv, hstring)
       | LChar _ -> (tenv, hchar)
     end
-    | PTaggedValue (constructor, ty_list, pattern_list) -> failwith "TODO PTaggedValue"
-    | PRecord (list, ty) -> failwith "TODO PRecord"
+    | PTaggedValue _ -> failwith "TODO PTaggedValue"
+    | PRecord _ -> failwith "TODO PRecord"
     | PTuple (pattern_list) -> 
       let (new_env, list) = patterns tenv pattern_list in
       (new_env,ATyTuple(list))
-    | POr (list) -> failwith "TODO POr"
-    | PAnd (list) -> failwith "TODO PAnd"
+    | POr _ -> failwith "TODO POr"
+    | PAnd _ -> failwith "TODO PAnd"
   in
   program ast
 
