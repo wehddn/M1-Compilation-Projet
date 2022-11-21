@@ -403,8 +403,14 @@ let typecheck tenv ast : typing_environment =
     | PTuple (pattern_list) -> 
       let (new_env, list) = patterns tenv pattern_list in
       (new_env,ATyTuple(list))
-    | POr _ -> failwith "TODO POr"
-    | PAnd _ -> failwith "TODO PAnd"
+    | PAnd pl | POr pl -> 
+      let tenv', ps = patterns tenv pl in
+        let rec aux pos ps =
+          match ps with
+          | [t1] -> (tenv', t1)
+          | t1::t2::q -> check_expected_type pos t1 t2; aux pos (t2::q)
+        in
+      aux pos ps
   in
   program ast
 
