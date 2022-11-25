@@ -504,19 +504,25 @@ module InstructionSelector : InstructionSelector =
     let r15 = `Reg X86_64_Architecture.R15
 
     let mov ~(dst : dst) ~(src : src) =
-      Instruction(movq src r15)::[Instruction(movq src r15)]
+      [Instruction(movq src r15); Instruction(movq src r15)]
 
     let bin ins ~dst ~srcl ~srcr =
       failwith "Students! This is your job! bin"
 
     let add ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! add"
+      (mov r15 srcl) @ 
+      [Instruction (addq srcr r15)] @ 
+      (mov dst r15)
 
     let sub ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! sub"
+      (mov r15 srcl) @ 
+      [Instruction (subq srcr r15)] @ 
+      (mov dst r15)
 
     let mul ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! mul"
+      (mov r15 srcl) @ 
+      [Instruction (imulq srcr r15)] @ 
+      (mov dst r15)
 
     let div ~dst ~srcl ~srcr =
       failwith "Students! This is your job! div"
