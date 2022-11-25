@@ -501,35 +501,37 @@ module InstructionSelector : InstructionSelector =
   struct
     open T
 
+    let r15 = `Reg X86_64_Architecture.R15
+
     let mov ~(dst : dst) ~(src : src) =
-      failwith "Students! This is your job!"
+      Instruction(movq src r15)::[Instruction(movq src r15)]
 
     let bin ins ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! bin"
 
     let add ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! add"
 
     let sub ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! sub"
 
     let mul ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! mul"
 
     let div ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! div"
 
     let andl ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! andl"
 
     let orl ~dst ~srcl ~srcr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! orl"
 
     let conditional_jump ~cc ~srcl ~srcr ~ll ~lr =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! conditional_jump"
 
     let switch ?default ~discriminant ~cases () =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! switch"
 
   end
 
@@ -563,7 +565,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       { param_count = 0; locals_space = 0; stack_map = S.IdMap.empty; }
 
     let location_of fd id =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! location_of"
 
     let function_prologue fd =
       (* Student! Implement me! *)
@@ -574,7 +576,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       []
 
     let call fd ~kind ~f ~args =
-      failwith "Students! This is your job!"
+      failwith "Students! This is your job! call"
 
   end
 
