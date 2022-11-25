@@ -518,3 +518,127 @@ and check_type_expression Γ e τ =
        ~%rax~.
 
      On verra les instructions restantes lors de la prochaine séance.
+* Cours 09 <2022-11-14>
+** Programmation x86-64, suite et fin
+*** Les instructions
+    - ~je foo~ : saute vers ~foo~ si le flag ZF de ~rflags~ est à 1.
+
+    - ~call foo~ : saute vers ~foo~ en empilant ~rip~.
+
+    - ~ret~ : dépile une valeur et la stocke dans ~rip~.
+
+    *Attention* : à l'exécution d'une instruction de saut, %rsp+8 doit toujours
+    être aligné sur 16 octets. Donc, %rsp doit être aligné sur 16 octets avant
+    toute instruction ~call~, puisque celle-ci va pousser l'adresse de retour.
+
+    Pour comprendre les deux dernières instructions, il faut discuter de la
+    pile, ce qu'on va faire tout de suite. Pour les autres, je vous renvoie aux
+    notes d'Andrew Tolmach.
+*** Convention d'appel et gestion de la pile
+    Une architecture doit spécifier une /convention d'appel/, qui dicte le
+    fonctionnement des appels de fonction dans le but de permettre
+    l'interopérabilité entre différents compilateurs, voire entre différents
+    langages.
+
+    Nous allons utiliser la convention d'appel dictée par l'interface binaire
+    (/application binary interface/, ou ABI) POSIX System V pour x86-64.
+
+    Celle-ci spécifie l'usage d'une pile pour stocker certains arguments de
+    fonction, ainsi que les variables locales. Le sommet courant de la pile
+    (son adresse) est, par convention, stocké dans le registre %rsp (/register
+    stack pointer/, logique !). Cette adresse doit toujours être alignée sur
+    huit octets (multiple de huit). La pile croît vers les adresses basses.
+
+    Un appel de fonction stocke ses données dans son /cadre de pile/. Le cadre
+    de pile courant est stocké dans le registre %rbp (/register base pointer/).
+    Elle ne doit pas accéder au reste de la pile (à l'exception de ses
+    arguments, voire plus bas).
+
+    Pour travailler sur la pile, on peut utiliser les instructions ~push~ et
+    ~pop~. L'instruction ~pushq SRC~ correspond à la séquence d'instructions
+    ~subq $8, %rsp; movq SRC, (%rsp)~, l'instruction ~popq DST~ correspond à
+    la séquence d'instructions ~movq -8(%rsp), DST; addq $8, %rsp~.
+
+    La valeur de retour de la fonction est stockée dans %rax. Les six premiers
+    arguments sont stockés dans %rdi, %rsi, %rdx, %rcx, %r8, %r9. Tous les
+    autres arguments (au delà du sixième) sont empilés de droite à gauche.
+
+    Les registres %rbx, %rbp %r12, %r13, %r14 et %r15 doivent être préservé par
+    l'appelé. Donc, si votre fonction les modifie, elle doit faire en sorte de
+    les restaurer avant de. Les autres registres sont susceptibles d'être
+    modifiés par les appelés arbitrairement, gare donc si vous les utilisez
+    autour d'un appel de fonction !
+
+    |------------+---------------------------|
+    | *Pile*     | (Valeurs de %rbp et %rsp) |
+    |------------+---------------------------|
+    | ...        |                           |
+    | argN       |                           |
+    | argN-1     |                           |
+    | ...        |                           |
+    | arg8       |                           |
+    | arg7       |                           |
+    | saved %rip |                           |
+    |------------+---------------------------|
+    | saved %rbp | <- %rbp                   |
+    | local var1 |                           |
+    | ...        |                           |
+    | local varN | <- %rsp                   |
+    |------------+---------------------------|
+
+    Enfin, l'invariant suivant doit *toujours* être vérifié : lors d'un ~call~,
+    %rsp doit être aligné sur 16 octets (autrement dit, sa valeur doit être une
+    adresse multiple de 16). Donc, comme ~call~ empile %rip, on sait que la
+    valeur %rsp+8 est alignée sur 16 octets au point d'entrée de toute fonction.
+
+    Pour les curieux et curieuses qui voudraient connaître le pourquoi du
+    comment, vous pouvez lire les réponses à
+    [[https://stackoverflow.com/questions/33868498/whats-the-purpose-of-stack-pointer-alignment-in-the-prologue-of-main][cette
+    question]] sur StackOverflow.
+*** Quelques exemples
+    On a étudié des rudiments de programmation x86-64 lors de la dernière
+    séance, et lors de la séance de TP. Essayons de mettre en pratique
+    aujourd'hui ensemble.
+**** Factorielle itérative
+     On écrit le code de factorielle dans un style itératif, avec une boucle. Le
+     code C, pour se fixer les idées :
+
+ #+BEGIN_SRC C
+   int64_t fact(int64_t n) {
+     int64_t res = 1;
+     while (n > 1) {
+       res *= n--;
+
+     }
+     return res;
+   }
+ #+END_SRC
+***** Solution
+ #+BEGIN_SRC asm
+      fact:   movq $1, %rax
+      fact0:  cmp $1, %rdi
+              jle fact1
+              imulq %rdi, %rax
+              dec %rdi
+              jmp fact0
+      fact1:  ret
+ #+END_SRC
+**** Fonction principale
+     On souhaite appeler ~printf()~ pour afficher le résultat de
+     ~fact(6)~. Attention aux contraintes d'alignement de l'ABI System V !
+***** Solution
+ #+BEGIN_SRC asm
+     msg:    .string "fact(6) = %d\n"
+     .global main
+     main:   subq $8, %rsp
+             movq $6, %rdi
+             call factr
+             movq $msg, %rdi
+             movq %rax, %rsi
+             call printf
+             movq $0, %rdi
+             call exit
+ #+END_SRC
+** Introduction au jalon 4
+   On présente rapidement la syntaxe de Retrolix, les différences vis-à-vis de
+   x86-64.
