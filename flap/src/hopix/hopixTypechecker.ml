@@ -248,26 +248,23 @@ let typecheck tenv ast : typing_environment =
       end
       ) with _ -> let Id(id_str) = (Position.value id) in type_error pos ("Unbound value `" ^ id_str ^ "'."))
   
-    | Tagged (constructor, _, expressions) -> 
+    | Tagged (constructor, ty, expr_list) -> 
       (
           try (
-              let Scheme (_, typ) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
-              let exprs_aty = List.map (fun e -> 
-                  type_of_expression tenv (Position.position e) e.value
-              ) expressions in
-              let rec aux aty exprs_aty = (
-                  match aty,exprs_aty with 
-                  | ATyArrow (data, t), expr_aty :: r ->
-                          check_expected_type pos data expr_aty; 
-                          aux t r
-                  | _, _ :: _ -> 
-                    type_error pos "This expression cannot be applied. (Too many arguments?)"
+              let Scheme (vars, aty) = lookup_type_scheme_of_constructor (Position.value constructor) tenv in 
+              let expr_aty_list = List.map (fun e -> type_of_expression tenv (Position.position e) (Position.value  e))expr_list in
+              let rec aux aty2 expr_aty_list = 
+                begin match aty2,expr_aty_list with 
+                  | ATyArrow (data, t), h::q ->
+                          check_expected_type pos data h; 
+                          aux t q
+                  | t, _ :: _ -> type_error pos "This expression cannot be applied. (Too many arguments?)"
                   | t, _ -> t
-              ) in
-              aux typ exprs_aty      
+                end in
+              aux aty expr_aty_list      
           )
-          with HopixTypes.UnboundConstructor -> (
-              let KId(constr_str) = constructor.value in 
+          with _ -> (
+              let KId(constr_str) = (Position.value constructor) in 
               type_error pos ("Unbound constructor `" ^ constr_str ^ "'.")
           )
       )
