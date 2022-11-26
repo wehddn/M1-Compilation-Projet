@@ -504,7 +504,9 @@ module InstructionSelector : InstructionSelector =
     let r15 = `Reg X86_64_Architecture.R15
 
     let mov ~(dst : dst) ~(src : src) =
-      [Instruction(movq src r15); Instruction(movq src r15)]
+      (*[(Instruction(Comment "mov"))] @*)
+      [Instruction(movq src r15)] @ 
+      [Instruction(movq r15 dst)]
 
     let bin ins ~dst ~srcl ~srcr =
       failwith "Students! This is your job! bin"
@@ -520,6 +522,7 @@ module InstructionSelector : InstructionSelector =
       (mov dst r15)
 
     let mul ~dst ~srcl ~srcr =
+      (*[(Instruction(Comment "mul"))] @*)
       (mov r15 srcl) @ 
       [Instruction (imulq srcr r15)] @ 
       (mov dst r15)
@@ -571,7 +574,10 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       { param_count = 0; locals_space = 0; stack_map = S.IdMap.empty; }
 
     let location_of fd id =
-      failwith "Students! This is your job! location_of"
+      let offset = Some (T.Lab (data_label_of_global id)) in
+      let base = Some (X86_64_Architecture.RIP) in 
+      let idx = None in
+      T.addr ?offset:offset ?idx:idx ?base:base ()
 
     let function_prologue fd =
       (* Student! Implement me! *)
