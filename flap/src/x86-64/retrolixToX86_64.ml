@@ -588,7 +588,8 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       []
 
     let call fd ~kind ~f ~args =
-      failwith "Students! This is your job! call"
+      (*[(T.Instruction(Comment "jmpdi"))] @*)
+      [T.Instruction (T.jmpdi f)]
 
   end
 
