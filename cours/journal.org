@@ -1032,3 +1032,277 @@ f:     pushq %rbp
      générer du code simple qui sera optimisé par une passe ultérieure. En
      particulier, le code montré ci-dessus peut être facilement généré par une
      fonction récursive.
+* Cours 11 <2022-11-28>
+** De Fopix à Retrolix, suite
+*** Les difficultés de la traduction, suite
+**** Passage à la convention d'appel de la machine
+     Fopix dispose du mécanisme d'appel de fonction usuel des langages de
+     programmation de haut niveau. Celui-ci est indépendant de l'architecture
+     cible. À l'inverse, Retrolix respecte la convention d'appel de x86-64. Une
+     étape de la traduction est donc d'implémenter cette traduction.
+
+     Pouvez-vous rappeler la convention d'appel POSIX System-V x86-64 ?
+
+     Les six premiers arguments sont passés dans les registres %rdi, %rsi, %rdx,
+     %rcx, %r8 et %r9, les suivants sont passés par la pile de droite à gauche.
+
+     (Cette convention ne concerne que les valeurs entières et pas les flottants
+     ni les valeurs occupant plus d'un mot machine. Ces derniers cas ne peuvent
+     pas se produire dans flap.)
+
+     Remarquons que la pile n'est pas encore explicite en Retrolix, qui dispose
+     donc d'un mécanisme de passage d'arguments dédié. C'est la passe de
+     Retrolix vers x86-64 qui explicite le passage des arguments, comme vous
+     l'avez vu lors des cours précédents.
+
+     Comment traduire les expressions suivantes ?
+
+     #+BEGIN_SRC
+     f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     f(1, 2 + 3)
+     #+END_SRC
+
+     #+BEGIN_SRC
+     12 + f(3 * 8)
+     #+END_SRC
+
+      #+BEGIN_SRC
+      f(1, 2, 3, y, 5, 6, 40 + 2)
+      #+END_SRC
+**** Solutions
+     #+BEGIN_SRC
+     call f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 1
+     x2 <- copy 2
+     x3 <- copy 3
+     x4 <- add x2, x3
+     %rdi <- copy x1
+     %rsi <- copy x4
+     call f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 1
+     x2 <- copy 2
+     x3 <- copy 3
+     x4 <- copy y
+     x5 <- copy 5
+     x6 <- copy 6
+     x7 <- copy 40
+     x8 <- copy 2
+     x9 <- add x7, x8
+     %rdi <- copy x1
+     %rsi <- copy x2
+     %rdx <- copy x3
+     %rcx <- copy x4
+     %r8  <- copy x5
+     %r9  <- copy x6
+     call f(x9)
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 12
+     x2 <- copy 3
+     x3 <- copy 8
+     x4 <- add x2, x3
+     %rdi <- copy x4
+     call f()
+     x5 <- copy %rax
+     x6 <- add x1, x5
+     #+END_SRC
+** De Hobix à Fopix
+*** Présentation de Hobix
+    Voir [[file://../flap/src/hobix/hobixAST.ml][hobixAST.ml]].
+
+    Quelles similarités et différences distinguez-vous entre Hobix et Fopix ?
+
+    Les langages sont identiques à quelques exceptions près :
+
+    - Fopix ne dispose pas de ~read/write/allocate_block()~ ad-hoc ;
+
+    - En Hobix, les fonctions sont des valeurs, et on a une construction ~apply~
+      générique (la fonction est une expression quelconque), et surtout une
+      construction de fonction anonyme dans les expressions ;
+
+    - Les littéraux de Fopix comprennent, en plus de ceux de Hobix, un nom de
+      fonction ~LFun f~ (qui doit être compris comme un pointeur vers ~f~).
+
+    En d'autres termes, en Hobix les fonctions sont *de première classe*, comme
+    en OCaml, tandis que Fopix ne dispose que de pointeurs de code, comme en C.
+
+    Pour traduire Hobix vers Fopix, il faut donc ramener les constructions de
+    bloc à des appels de fonctions génériques, mais surtout éliminer les
+    fonctions de première classe. On va suivre l'approche vue durant le cours
+    d'introduction à la sémantique, avec une passe dite d'/explicitation des
+    fermetures/ (ou /closure conversion/ en anglais).
+*** L'explication des fermetures
+    Comment traduire les programmes OCaml suivants en C ? Comme d'habitude, on
+    cherche une traduction mécanique et locale (expression par expression),
+    comme le ferait un compilateur !
+
+    On choisit le format suivant pour les fermetures.
+
+    |------------------+------------------+------------------+-----|
+    | pointeur de code | variable libre 0 | variable libre 2 | ... |
+    |------------------+------------------+------------------+-----|
+    | clo[0]           | clo[1]           | clo[2]           | ... |
+    |------------------+------------------+------------------+-----|
+
+**** Fonctions anonymes
+      Les exemples ci-dessous visent à vous rappeler qu'une fonction n'est pas
+      qu'un pointeur de code.
+       #+BEGIN_SRC ocaml
+ let f0 z =
+   let y = z * 2 in
+   fun x -> x + y + z
+       #+END_SRC
+
+       #+BEGIN_SRC ocaml
+ let f1 y =
+   let g = fun x -> x + y in
+   let h = fun x -> 2 * x in
+   if y > 0 then g else h
+       #+END_SRC
+***** Solutions
+       *Remarque* : les solutions écrites en pseudo-C ci-dessous sont données
+       dans un but pédagogique. Les détails sont volontairement simplifiés par
+       rapport à ce une traduction d'OCaml vers C complète.
+
+       #+BEGIN_SRC C
+ int f0_anon0(block_t *clo, int x) {
+   return x + clo[1] + clo[2];
+ }
+
+ block_t *f0(int z) {
+   block_t *clo = allocate_block(3);
+   int y = z * 2;
+   clo[0] = &f0_anon0;
+   clo[1] = y;
+   clo[2] = z;
+   return clo;
+ }
+       #+END_SRC
+
+       #+BEGIN_SRC C
+ int f1_anon0(block_t *clo, int x) {
+   return x + clo[1];
+ }
+
+ int f1_anon1(block_t *clo, int x) {
+   return 2 * x;
+ }
+
+ block_t *f1(int y) {
+   block_t *clo = allocate_block(2);
+   if (y > 0) {
+     clo[0] = &f0_anon0;
+     clo[1] = y;
+   } else {
+     clo[0] = &f0_anon1;
+   }
+   return clo;
+ }
+       #+END_SRC
+
+       *Attention* : dans le code ci-dessus, on a traité les appels aux
+       fonctions top-level de manière spéciale (on a pas fabriqué de fermeture
+       pour elles puisqu'elles sont nécessairement closes !). C'est une
+       optimisation importante mais que vous ne réaliserez sans doute pas dans
+       le jalon.
+**** Applications
+      #+BEGIN_SRC ocaml
+ let f2 x =
+   let f = f0 4 in
+   f x
+      #+END_SRC
+
+***** Solution
+      #+BEGIN_SRC C
+ void f2(int x) {
+   block_t *clo = f0(4);
+   return clo[0](clo, x);
+ }
+      #+END_SRC
+
+      Notez qu'ici aussi, on a supposé que f0 était une fonction connue, et on
+      l'a implémentée par un appel direct plutôt que par un appel indirect et
+      une fermeture.
+**** Schéma général de la traduction
+     À quoi ressemble la traduction précédente, si on veut générer du Fopix ?
+
+     Le pseudo-code ci-dessous exprime la fonction de compilation C(-) qui prend
+     une expression Hopix e et lui associe une expression Fopix C(e).
+
+      #+BEGIN_SRC
+ C(e₁ e₂) = soit c et x des identifiants frais
+            << val c = C(e₁);
+               val x = C(e₂);
+               call c[0] with (c, x) >>
+
+ C(fun x₁ ... xₖ → e) = soit { y₁, ..., yₗ } = FV(fun (x₁, ..., xₖ) → e),
+                        soit "fresh_name" un nom de fonction frais,
+                        l'expression est traduite vers :
+                          << val c = allocate_block (l + 1);
+                             c[0] := &fresh_name;
+                             c[1] := y₁;
+                             c[2] := y₂;
+                             ...
+                             c[l] := yₗ;
+                             c >>
+                        et on ajoute une fonction top-level :
+                          << def fresh_name(clo, x₁, ..., xₖ) =
+                             C(e)[y₁ \ clo[1], ..., yₗ \ clo[l]] >>
+
+      #+END_SRC
+
+      Il reste cependant une question en suspend : celle de la récursion.
+**** La récursion
+***** Simple
+       Comment traduire l'exemple ci-dessous, par exemple ?
+ #+BEGIN_SRC ocaml
+ let rec repeat n f =
+   let rec aux n = if n > 0 then (f n; aux (n - 1)) in
+   aux n
+ #+END_SRC
+****** Solution 1
+       Quand on compile le corps de ~aux~, on connaît le nom de la fonction
+       Fopix qui correspond. On peut donc spécialiser la traduction pour
+       remplacer l'appel récursif à ~aux~ par un appel direct à la fonction
+       traduite.
+****** Solution 2
+       On peut mimer l'interprète du jalon 3 et produire une fermeture cyclique.
+       On voit donc l'occurrence récursive de ~aux~ comme une variable libre.
+
+       #+BEGIN_SRC C
+ void repeat_aux(block_t *clo, int n) {
+   if (n > 0) {
+     clo[1][0](clo[1], n);
+     clo[2][0](clo[2], n - 1);
+   }
+ }
+
+ void repeat(int n, block_t *clo_f) {
+   block_t *clo = allocate_block(3);
+   clo[0] = &repeat_aux;
+   clo[1] = clo_f;
+   clo[2] = clo;
+   clo[0](clo, n);
+ }
+       #+END_SRC
+***** TODO Mutuelle
+      À traduire pour la prochaine fois.
+       #+BEGIN_SRC ocaml
+let repeat_alt n f =
+  let rec odd k =
+    if k < 0 then () else (f true; even (k - 1))
+  and even k =
+    if k < 0 then () else (f false; odd (k - 1))
+  in
+  if k mod 2 = 0 then even k else odd k
+       #+END_SRC
