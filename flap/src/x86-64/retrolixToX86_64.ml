@@ -569,27 +569,51 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       + (if empty_frame fd then 0 else 1) * Mint.size_in_bytes
       + fd.locals_space
 
-    let frame_descriptor ~params ~locals =
+    let frame_descriptor ~params ~locals = 
       (* Student! Implement me! *)
-      { param_count = 0; locals_space = 0; stack_map = S.IdMap.empty; }
+      let rec aux_l stack offset locals = 
+        match locals with
+        | [] -> stack
+        | h::t -> aux_l (S.IdMap.add h (Int64.sub 0L offset) stack) (Int64.add offset 8L) t
+      in
+      let rec aux_p stack offset params = 
+        match params with
+        | [] -> stack
+        | h::t -> aux_p (S.IdMap.add h (Int64.add 0L offset) stack) (Int64.add offset 8L) t
+      in
+      let stack = aux_l S.IdMap.empty 0L locals in
+      let stack = aux_p stack 0L params in
+      { param_count = List.length params; locals_space = List.length locals; stack_map = stack; }
 
     let location_of fd id =
-      let offset = Some (T.Lab (data_label_of_global id)) in
-      let base = Some (X86_64_Architecture.RIP) in 
-      let idx = None in
-      T.addr ?offset:offset ?idx:idx ?base:base ()
+      if S.IdMap.mem id fd.stack_map then 
+        let offset = Some (T.Lit (S.IdMap.find id fd.stack_map)) in
+        let base = Some (X86_64_Architecture.RBP) in 
+        let idx = None in
+        T.addr ?offset:offset ?idx:idx ?base:base ()
+      else
+        let offset = Some (T.Lab (data_label_of_global id)) in
+        let base = Some (X86_64_Architecture.RIP) in 
+        let idx = None in
+        T.addr ?offset:offset ?idx:idx ?base:base ()
 
     let function_prologue fd =
-      (* Student! Implement me! *)
-      []
-
+      [T.Instruction (T.pushq rbp)] @
+      [T.Instruction (T.movq rsp rbp)] @
+      [T.Instruction (T.subq (T.liti (8 * fd.locals_space)) rsp)]
+          
     let function_epilogue fd =
-      (* Student! Implement me! *)
-      []
+      [T.Instruction (T.addq (T.liti (8 * fd.locals_space)) rsp)] @
+      [T.Instruction (T.popq rbp)]
 
     let call fd ~kind ~f ~args =
-      (*[(T.Instruction(Comment "jmpdi"))] @*)
-      [T.Instruction (T.jmpdi f)]
+      match kind with 
+      | `Normal -> 
+        let pushq = List.map (fun x -> T.Instruction (T.pushq x)) args in
+        pushq @
+        [T.Instruction (T.calldi f)] @
+        [T.Instruction (T.addq (T.liti (8 * (List.length args))) rsp)]
+      | `Tail -> [T.Instruction (T.jmpdi f)]
 
   end
 
