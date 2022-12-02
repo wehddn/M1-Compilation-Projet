@@ -505,27 +505,27 @@ module InstructionSelector : InstructionSelector =
 
     let mov ~(dst : dst) ~(src : src) =
       (*[(Instruction(Comment "mov"))] @*)
-      [Instruction(movq src r15)] @ 
-      [Instruction(movq r15 dst)]
+      [Instruction(movq ~src:src ~dst:r15)] @ 
+      [Instruction(movq ~src:r15 ~dst:dst)]
 
     let bin ins ~dst ~srcl ~srcr =
       failwith "Students! This is your job! bin"
 
     let add ~dst ~srcl ~srcr =
-      (mov r15 srcl) @ 
-      [Instruction (addq srcr r15)] @ 
-      (mov dst r15)
+      (mov ~dst:r15 ~src:srcl) @ 
+      [Instruction (addq ~src:srcr ~dst:r15)] @ 
+      (mov ~dst:dst ~src:r15)
 
     let sub ~dst ~srcl ~srcr =
-      (mov r15 srcl) @ 
-      [Instruction (subq srcr r15)] @ 
-      (mov dst r15)
+      (mov ~dst:r15 ~src:srcl) @ 
+      [Instruction (subq ~src:srcr ~dst:r15)] @ 
+      (mov ~dst:dst ~src:r15)
 
     let mul ~dst ~srcl ~srcr =
       (*[(Instruction(Comment "mul"))] @*)
-      (mov r15 srcl) @ 
-      [Instruction (imulq srcr r15)] @ 
-      (mov dst r15)
+      (mov ~dst:r15 ~src:srcl) @ 
+      [Instruction (imulq ~src:srcr ~dst:r15)] @ 
+      (mov ~dst:dst ~src:r15)
 
     let div ~dst ~srcl ~srcr =
       failwith "Students! This is your job! div"
@@ -598,22 +598,22 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
         T.addr ?offset:offset ?idx:idx ?base:base ()
 
     let function_prologue fd =
-      [T.Instruction (T.pushq rbp)] @
-      [T.Instruction (T.movq rsp rbp)] @
-      [T.Instruction (T.subq (T.liti (8 * fd.locals_space)) rsp)]
+      [T.Instruction (T.pushq ~src:rbp)] @
+      [T.Instruction (T.movq ~src:rsp ~dst:rbp)] @
+      [T.Instruction (T.subq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)]
           
     let function_epilogue fd =
-      [T.Instruction (T.addq (T.liti (8 * fd.locals_space)) rsp)] @
-      [T.Instruction (T.popq rbp)]
+      [T.Instruction (T.addq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)] @
+      [T.Instruction (T.popq ~dst:rbp)]
 
     let call fd ~kind ~f ~args =
       match kind with 
       | `Normal -> 
-        let pushq = List.map (fun x -> T.Instruction (T.pushq x)) args in
+        let pushq = List.map (fun x -> T.Instruction (T.pushq ~src:x)) args in
         pushq @
-        [T.Instruction (T.calldi f)] @
-        [T.Instruction (T.addq (T.liti (8 * (List.length args))) rsp)]
-      | `Tail -> [T.Instruction (T.jmpdi f)]
+        [T.Instruction (T.calldi ~tgt:f)] @
+        [T.Instruction (T.addq ~src:(T.liti (8 * (List.length args))) ~dst:rsp)]
+      | `Tail -> [T.Instruction (T.jmpdi ~tgt:f)]
 
   end
 
