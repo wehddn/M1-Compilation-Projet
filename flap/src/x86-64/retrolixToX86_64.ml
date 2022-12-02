@@ -509,32 +509,27 @@ module InstructionSelector : InstructionSelector =
       [Instruction(movq ~src:r15 ~dst:dst)]
 
     let bin ins ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! bin"
-
-    let add ~dst ~srcl ~srcr =
       (mov ~dst:r15 ~src:srcl) @ 
-      [Instruction (addq ~src:srcr ~dst:r15)] @ 
+      [Instruction (ins ~src:srcr ~dst:r15)] @ 
       (mov ~dst:dst ~src:r15)
+
+    let add ~dst ~srcl ~srcr = 
+      bin addq ~dst ~srcl ~srcr
 
     let sub ~dst ~srcl ~srcr =
-      (mov ~dst:r15 ~src:srcl) @ 
-      [Instruction (subq ~src:srcr ~dst:r15)] @ 
-      (mov ~dst:dst ~src:r15)
+      bin subq ~dst ~srcl ~srcr
 
     let mul ~dst ~srcl ~srcr =
-      (*[(Instruction(Comment "mul"))] @*)
-      (mov ~dst:r15 ~src:srcl) @ 
-      [Instruction (imulq ~src:srcr ~dst:r15)] @ 
-      (mov ~dst:dst ~src:r15)
+      bin imulq ~dst ~srcl ~srcr
 
     let div ~dst ~srcl ~srcr =
       failwith "Students! This is your job! div"
 
     let andl ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! andl"
+      bin andq ~dst ~srcl ~srcr
 
     let orl ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! orl"
+      bin orq ~dst ~srcl ~srcr
 
     let conditional_jump ~cc ~srcl ~srcr ~ll ~lr =
       failwith "Students! This is your job! conditional_jump"
