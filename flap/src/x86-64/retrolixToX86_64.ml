@@ -532,7 +532,10 @@ module InstructionSelector : InstructionSelector =
       bin orq ~dst ~srcl ~srcr
 
     let conditional_jump ~cc ~srcl ~srcr ~ll ~lr =
-      failwith "Students! This is your job! conditional_jump"
+      (mov ~dst:r15 ~src:srcl) @ 
+      [Instruction (cmpq ~src1:srcr ~src2:r15)] @ 
+      [Instruction (jccl ~cc:cc ~tgt:ll)] @ 
+      [Instruction (jmpl ~tgt:lr)]
 
     let switch ?default ~discriminant ~cases () =
       failwith "Students! This is your job! switch"
@@ -592,7 +595,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
         let idx = None in
         T.addr ?offset:offset ?idx:idx ?base:base ()
 
-    let function_prologue fd =
+    let function_prologue fd = 
       [T.Instruction (T.pushq ~src:rbp)] @
       [T.Instruction (T.movq ~src:rsp ~dst:rbp)] @
       [T.Instruction (T.subq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)]
