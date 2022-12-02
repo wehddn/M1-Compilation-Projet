@@ -536,10 +536,24 @@ module InstructionSelector : InstructionSelector =
       [Instruction (cmpq ~src1:srcr ~src2:r15)] @ 
       [Instruction (jccl ~cc:cc ~tgt:ll)] @ 
       [Instruction (jmpl ~tgt:lr)]
-
+  
     let switch ?default ~discriminant ~cases () =
-      failwith "Students! This is your job! switch"
-
+      let rec aux i instr_list = 
+        if i >= Array.length cases then instr_list
+        else 
+          let instr_list = 
+            instr_list @ 
+            [Instruction (cmpq ~src1:(liti i) ~src2:discriminant)] @
+            [Instruction (jccl ~cc:E ~tgt:(Array.get cases i))] in
+        aux (i+1) instr_list
+      in
+      let instr_list = aux 0 [] in
+      let instr_list = 
+        match default with
+        | Some d -> instr_list @ 
+                    [Instruction (jmpl ~tgt:d)]
+      in instr_list
+      
   end
 
 module FrameManager(IS : InstructionSelector) : FrameManager =
