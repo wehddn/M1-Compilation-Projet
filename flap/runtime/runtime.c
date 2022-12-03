@@ -16,7 +16,7 @@ void print_string(const char* s) {
 }
 
 void print_int(int64_t n) {
-    fprintf(stderr, "Students! This is your job!\n");
+    fprintf(stdout, "%lld\n", n);
 }
 
 void observe_int(int64_t n) {
