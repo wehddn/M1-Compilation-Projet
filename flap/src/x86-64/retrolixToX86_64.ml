@@ -559,6 +559,8 @@ module InstructionSelector : InstructionSelector =
 
 module FrameManager(IS : InstructionSelector) : FrameManager =
   struct
+    open T
+    
     type frame_descriptor =
       {
         param_count : int;
@@ -581,7 +583,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       Mint.size_in_bytes
       + (if empty_frame fd then 0 else 1) * Mint.size_in_bytes
       + fd.locals_space
-
+      
     let frame_descriptor ~params ~locals = 
       (* Student! Implement me! *)
       let rec aux_l stack offset locals = 
@@ -600,34 +602,34 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
 
     let location_of fd id =
       let (offset, base) = if S.IdMap.mem id fd.stack_map then 
-        (Some (T.Lit (S.IdMap.find id fd.stack_map)), Some (X86_64_Architecture.RBP))
+        (Some (Lit (S.IdMap.find id fd.stack_map)), Some (X86_64_Architecture.RBP))
       else
-        (Some (T.Lab (data_label_of_global id)), Some (X86_64_Architecture.RIP))
-      in T.addr ?offset:offset ?idx:None ?base:base ()
+        (Some (Lab (data_label_of_global id)), Some (X86_64_Architecture.RIP))
+      in addr ?offset:offset ?idx:None ?base:base ()
 
     let function_prologue fd = 
-      [T.Instruction (T.pushq ~src:rbp)] @
-      [T.Instruction (T.movq ~src:rsp ~dst:rbp)] @
+      [Instruction (pushq ~src:rbp)] @
+      [Instruction (movq ~src:rsp ~dst:rbp)] @
       if fd.locals_space > 0 then
-        [T.Instruction (T.subq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)]
+        [Instruction (subq ~src:(liti (8 * fd.locals_space)) ~dst:rsp)]
       else 
         []
           
     let function_epilogue fd =
       (if fd.locals_space > 0 then
-        [T.Instruction (T.addq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)] 
+        [Instruction (addq ~src:(liti (8 * fd.locals_space)) ~dst:rsp)] 
       else 
         []) @
-      [T.Instruction (T.popq ~dst:rbp)]
+      [Instruction (popq ~dst:rbp)]
 
     let call fd ~kind ~f ~args =
       match kind with 
       | `Normal -> 
-        let pushq = List.rev (List.map (fun x -> T.Instruction (T.pushq ~src:x)) args) in
+        let pushq = List.rev (List.map (fun x -> Instruction (pushq ~src:x)) args) in
         pushq @
-        [T.Instruction (T.calldi ~tgt:f)] @
-        [T.Instruction (T.addq ~src:(T.liti (8 * (List.length args))) ~dst:rsp)]
-      | `Tail -> [T.Instruction (T.jmpdi ~tgt:f)]
+        [Instruction (calldi ~tgt:f)] @
+        [Instruction (addq ~src:(liti (8 * (List.length args))) ~dst:rsp)]
+      | `Tail -> [Instruction (jmpdi ~tgt:f)]
 
   end
 
