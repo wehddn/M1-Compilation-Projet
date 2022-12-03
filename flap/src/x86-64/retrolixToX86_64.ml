@@ -552,6 +552,7 @@ module InstructionSelector : InstructionSelector =
         match default with
         | Some d -> instr_list @ 
                     [Instruction (jmpl ~tgt:d)]
+        | None -> instr_list
       in instr_list
       
   end
@@ -598,24 +599,25 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
       { param_count = List.length params; locals_space = List.length locals; stack_map = stack; }
 
     let location_of fd id =
-      if S.IdMap.mem id fd.stack_map then 
-        let offset = Some (T.Lit (S.IdMap.find id fd.stack_map)) in
-        let base = Some (X86_64_Architecture.RBP) in 
-        let idx = None in
-        T.addr ?offset:offset ?idx:idx ?base:base ()
+      let (offset, base) = if S.IdMap.mem id fd.stack_map then 
+        (Some (T.Lit (S.IdMap.find id fd.stack_map)), Some (X86_64_Architecture.RBP))
       else
-        let offset = Some (T.Lab (data_label_of_global id)) in
-        let base = Some (X86_64_Architecture.RIP) in 
-        let idx = None in
-        T.addr ?offset:offset ?idx:idx ?base:base ()
+        (Some (T.Lab (data_label_of_global id)), Some (X86_64_Architecture.RIP))
+      in T.addr ?offset:offset ?idx:None ?base:base ()
 
     let function_prologue fd = 
       [T.Instruction (T.pushq ~src:rbp)] @
       [T.Instruction (T.movq ~src:rsp ~dst:rbp)] @
-      [T.Instruction (T.subq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)]
+      if fd.locals_space > 0 then
+        [T.Instruction (T.subq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)]
+      else 
+        []
           
     let function_epilogue fd =
-      [T.Instruction (T.addq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)] @
+      (if fd.locals_space > 0 then
+        [T.Instruction (T.addq ~src:(T.liti (8 * fd.locals_space)) ~dst:rsp)] 
+      else 
+        []) @
       [T.Instruction (T.popq ~dst:rbp)]
 
     let call fd ~kind ~f ~args =
