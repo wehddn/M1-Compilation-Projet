@@ -594,7 +594,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
         | h::t -> aux_p (S.IdMap.add h (Int64.add 0L offset) stack) (Int64.add offset 8L) t
       in
       let stack = aux_l S.IdMap.empty 0L locals in
-      let stack = aux_p stack 0L params in
+      let stack = aux_p stack 16L params in
       { param_count = List.length params; locals_space = List.length locals; stack_map = stack; }
 
     let location_of fd id =
@@ -621,7 +621,7 @@ module FrameManager(IS : InstructionSelector) : FrameManager =
     let call fd ~kind ~f ~args =
       match kind with 
       | `Normal -> 
-        let pushq = List.map (fun x -> T.Instruction (T.pushq ~src:x)) args in
+        let pushq = List.rev (List.map (fun x -> T.Instruction (T.pushq ~src:x)) args) in
         pushq @
         [T.Instruction (T.calldi ~tgt:f)] @
         [T.Instruction (T.addq ~src:(T.liti (8 * (List.length args))) ~dst:rsp)]
