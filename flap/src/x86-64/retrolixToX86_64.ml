@@ -502,6 +502,9 @@ module InstructionSelector : InstructionSelector =
     open T
 
     let r15 = `Reg X86_64_Architecture.R15
+    let rcx = `Reg X86_64_Architecture.RCX
+    let rdx = `Reg X86_64_Architecture.RDX
+    let rax = `Reg X86_64_Architecture.RAX 
 
     let mov ~(dst : dst) ~(src : src) =
       (*[(Instruction(Comment "mov"))] @*)
@@ -523,7 +526,11 @@ module InstructionSelector : InstructionSelector =
       bin imulq ~dst ~srcl ~srcr
 
     let div ~dst ~srcl ~srcr =
-      failwith "Students! This is your job! div"
+      mov ~dst:rdx ~src:(`Imm (Lit 0L)) @
+      mov ~dst:rax ~src:srcl @
+      mov ~dst:rcx ~src:srcr @
+      [Instruction (idivq ~src:rcx)] @
+      mov ~dst:dst ~src:rax
 
     let andl ~dst ~srcl ~srcr =
       bin andq ~dst ~srcl ~srcr
