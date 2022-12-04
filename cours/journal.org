@@ -1306,3 +1306,498 @@ let repeat_alt n f =
   in
   if k mod 2 = 0 then even k else odd k
        #+END_SRC
+* Cours 12 <2022-12-05>
+** De Hobix à Fopix, suite et fin
+*** Schéma général de la traduction
+**** Récursion
+***** Mutuelle
+       #+BEGIN_SRC ocaml
+ let repeat_alt n f =
+   let rec odd k =
+     if k < 0 then () else (f true; even (k - 1))
+   and even k =
+     if k < 0 then () else (f false; odd (k - 1))
+   in
+   if n mod 2 = 0 then even n else odd n       #+END_SRC
+****** Solution
+       On peut appliquer les mêmes techniques que pour la récursion simple.
+
+ #+BEGIN_SRC
+ void repeat_alt_odd(block_t *clo, int k) {
+   if (k >= 0) {
+     clo[1][0](clo[1], 1);
+     clo[2][0](clo[2], k - 1);
+   }
+ }
+
+ // repeat_alt_even est similaire
+ ...
+
+ void repeat_alt(int n, block_t *clo_f) {
+   block_t *clo_odd = allocate_block(3);
+   block_t *clo_even = allocate_block(3);
+   clo_odd[0] = &repeat_alt_odd;
+   clo_odd[1] = clo_f;
+   clo_odd[2] = clo_even;
+   clo_even[0] = &repeat_alt_even;
+   clo_even[1] = clo_f;
+   clo_even[2] = clo_odd;
+   if (n % 2 == 0) {
+     clo_even[0](clo_even, n);
+   } else {
+     clo_odd[0](clo_odd, n);
+   }
+ }
+ #+END_SRC
+       On peut également suivre OCaml et produire une unique fermeture qui
+       partage les pointeurs de toutes les fonctions mutuellement récursives et
+       l'union des variables libres de ces fonctions.
+
+       Quel est l'avantage de cette deuxième solution ? Économiser de l'espace
+       sur l'environnement.
+** De Hopix à Hobix
+   (Cette étape n'est pas couverte par un jalon.)
+
+   Comme pour les passes de traduction précédentes, on va commencer par chercher
+   les similarités et différences entre Hopix et Hobix. Quelles sont-elles ?
+
+   La principale est qu'Hopix dispose de données structurées : références,
+   enregistrements, types sommes, types n-uplets. À l'inverse, Hobix n'a que des
+   constructions d'allocation/création/modification de blocs. De plus, Hobix n'a
+   pas de boucle dénombrée (~for~) mais seulement une boucle ~while~. Enfin,
+   Hobix n'a pas de construction de séquencement (~e₁; ...; eₖ~) dédiée.
+
+   La traduction doit donc éliminer les boucles ~for~, mais également les
+   constructeurs et destructeurs des types structurés.
+
+   |----------------+----------------------------------+--------------------|
+   | Type           | Constructeur                     | Destructeur        |
+   |----------------+----------------------------------+--------------------|
+   | Référence      | ref e_init                       | !e                 |
+   | $N$-uplet      | (e$_1$, ..., e$_N$)              | match e with ...   |
+   | Enregistrement | { f1 = e$_1$; ...; fN = e$_N$; } | e.f$_i$ (ou match) |
+   | Type somme     | K (e1, ..., eN)                  | match e with ...   |
+   |----------------+----------------------------------+--------------------|
+
+   (Pour les références, ne pas oublier l'assignation, qui n'est ni un
+   constructeur ni un destructeur.)
+*** Traduction des boucles ~for~
+    À votre avis, vers quelle construction Hobix est-il naturel de traduire les
+    boucles ~for~ de Hopix ?
+
+    La boucle ~while~, bien sûr !
+
+    Proposons une traduction générale. Comme précédemment, on écrira C(-) pour
+    la fonction de traduction, i.e., /C(e)/ sera le traduit de /e/.
+
+#+BEGIN_SRC
+C(for x in (lo to hi) { body }) =
+  << let cpt = allocate_block(1);
+     let h = C(hi);
+     cpt[0] := C(lo);
+     while (cpt[0] <= h) {
+       let x = cpt[0];
+       C(body);
+       cpt[0] := cpt[0] + 1;
+     } >> où cpt et h sont fraîches.
+#+END_SRC
+*** Traduction du séquencement
+#+BEGIN_SRC
+C(e₁ ; e₂ ; ... ; eₖ) = << val _ = C(e₁); val _ = C(e₂); ...; C(eₖ) >>
+#+END_SRC
+*** Traduction des types référence
+    Première question : quelle représentation sous forme d'un bloc ?  On peut se
+    contenter d'un bloc de taille 1, qui stocke le contenu de la référence.
+
+    Pourquoi ?
+
+    Parce que toutes les données qu'on va manipuler occupent exactement un
+    mot. Cela provient du fait qu'on manipule soit des entiers machines, soit
+    des booléens manipulés comme des entiers (c'est une perte de place qui nous
+    simplifie néanmoins la vie), soit des pointeurs (y compris des adresses de
+    bloc). Par exemple, une référence qui contient un n-uplet va être
+    implémentée par un bloc de taille 1 dont l'unique cellule contient l'adresse
+    du bloc qui lui même stocke le contenu du N-uplet.
+
+#+BEGIN_SRC
+C(ref e) = << let x = allocate_block(1); x[0] := C(e); x >> où x est frais
+#+END_SRC
+
+#+BEGIN_SRC
+C(!e) = << C(e)[0] >>
+#+END_SRC
+
+#+BEGIN_SRC
+C(e₁ := e₂) = << C(e₁)[0] := C(e₂) >>
+#+END_SRC
+*** Traduction des types enregistrement
+    Quelle représentation ? Un bloc de taille N, où N est le nombre de champs de
+    l'enregistrement.
+
+    La traduction suppose qu'on a fixé un ordre d'énumération quelconque des
+    champs : f1, f2, ... jusqu'à fN. En pratique, on peut prendre l'ordre de
+    déclaration, mais cet ordre n'a pas d'importance.
+
+    On va supposer qu'on a une fonction IDX(f) qui associe au champ f un indice.
+    Il peut être calculé lors de la définition du type correspondant.
+
+    (Pourquoi ? Parce le code source Hopix n'est pas capable de l'observer.)
+
+#+BEGIN_SRC
+C({ f1 = e1; ...; fN = eN; }) = << let x = allocate_block(N) in
+                                   x[IDX(f1)] := C(e1);
+                                   ...;
+                                   x[IDX(fN)] := C(eN);
+                                   x >> où x est frais
+#+END_SRC
+
+     *Attention* : si l'ordre n'importe pas, dans la traduction ci-dessus, il
+     est important qu'on fasse le calcul de eᵢ avant eᵢ₊₁ pour respecter la
+     sémantique de Hopix !
+
+#+BEGIN_SRC
+C(e.f) = C(e)[IDX(f)]
+#+END_SRC
+*** Traduction des n-uplets
+    Une simple variation sur les enregistrements, à la différence que l'ordre
+    des champs est fixé.
+*** Traduction des types sommes
+    Supposons qu'on ait le type Hopix suivant (syntaxe OCaml).
+
+    #+BEGIN_SRC
+type t =
+  | Empty
+  | Leaf of int
+  | Node of t * t
+    #+END_SRC
+    Quelle représentation sous forme de bloc adopter pour ses constructeurs ?
+
+    On doit toujours avoir au moins une cellule dans le bloc, pour distinguer le
+    constructeur dont il s'agit. Celle-ci contient une étiquette (/tag/), qui
+    associe un entier unique à chaque constructeur (comme pour la fonction IDX()
+    des enregistrements, elle peut être calculée à la définition du type). En
+    plus du tag, on a besoin d'autant d'espace que le constructeur a de
+    paramètres : 0 pour ~Empty~, 1 pour ~Leaf~ et 2 pour ~Node~.
+
+    Plus généralement, si le constructeur Kᵢ a kᵢ paramètres, on a besoin d'un
+    bloc de taille 1 + kᵢ pour le représenter.
+
+    #+BEGIN_SRC
+C(K (e_1, ..., e_kᵢ)) = << let x = allocate_block (1 + kᵢ);
+                           x[0] := TAG(i);
+                           x[1] := C(e_1);
+                           ...
+                           x[1 + kᵢ] := C(e_kᵢ);
+                           x >> où x est frais
+    #+END_SRC
+*** Traduction du filtrage de motifs
+    La traduction du filtrage de motif est plus subtile que celle des
+    constructions précédentes, puisque le filtrage est une construction très
+    expressive qui permet simultanément de déstructurer une valeur, lier des
+    variables, discriminer entre plusieurs cas, etc.
+    Comment traduire l'exemple suivant ?
+
+    #+BEGIN_SRC
+def len (l) =
+  case l {
+  | Nil => 0
+  | Cons (_, xs) => 1 + len (xs)
+  }
+     #+END_SRC
+
+     #+BEGIN_SRC
+def len (l) =
+   if l[0] = 0 then
+     0
+   else
+     let xs = l[2] in
+     1 + len (xs)
+     #+END_SRC
+
+     On rappelle que le filtrage est de la forme ~match e { b1 | ... | bN }~ où
+     chaque ~bᵢ~ est une /branche/, c'est à dire de la forme ~p ⇒ e~, où ~p~ est
+     un motif. Pouvez-vous rappeler les formes de motifs possibles ?
+
+     Il s'agit des :
+
+     - variables,
+     - attrape-tout (/wildcard/ en anglais),
+     - annotations de types,
+     - constantes littérales,
+     - constructeur de types sommes,
+     - n-uplets,
+     - enregistrement,
+     - motif ET,
+     - motif OU.
+
+     L'approche la plus simple est de traduire le filtrage vers une séquence de
+     conditionnelles et déclarations locales imbriquées.
+
+     On peut commencer par éliminer les motifs OU, en les ramenant à des
+     branches supplémentaires dans la construction de filtrage initiale.
+     (Pouvez-vous expliciter cette traduction ?)
+
+     Comment formuleriez-vous la traduction d'un motif ? On traduit vers :
+
+     1. une expression booléenne qui dit si la valeur discriminée est filtrée,
+
+     2. une liste de liaisons identifiant → expression qui indique, le cas
+        échéant, quelles variables ont été liées.
+
+     La fonction de traduction des motifs prend en paramètre le motif /p/ mais
+     également l'expression /d/ dont on veut filtrer le résultat.
+
+     #+BEGIN_SRC
+                         C(d, x) = (~true~, [ ~x = d~ ])
+                         C(d, _) = (~true~, [ ])
+                   C(d, p : ann) = C(d, p)
+                         C(d, l) = (~d = l~, [ ])
+             C(d, K(p₁, ..., pₖ) = (~c₁ && ... && cₖ && d[0] = TAG(K)~,
+                                    b₁ @ ... @ bₖ) où (cᵢ, bᵢ) = C(~d[i]~, pᵢ)
+           C(d, ⟨ p₁, ... , pₖ ⟩) = (~c₁ && ... && cₖ~, b₁ @ ... @ bₖ)
+                                   où (cᵢ, bᵢ) = C(~d[i-1]~, pᵢ)
+ C(d, { l₁ = p₁; ... ; lₖ = pₖ }) = (~c₁ && ... && cₖ~, b₁ @ ... @ bₖ)
+                                   où (cᵢ, bᵢ) = C(~d[IDX(lᵢ)]~, pᵢ)
+                                   en supposant l₁, ..., lₖ dans le bon ordre !
+                C(d, (p₁ && p₂)) = (~c₁ && c₂~, b₁ @ b₂)
+                                   où (cᵢ, bᵢ) = C(~d~, pᵢ)
+     #+END_SRC
+
+     La traduction du filtrage lui même est ensuite facile à formuler.
+
+     #+BEGIN_SRC
+     C(match e { p₁ ⇒ e₁ | ... | pₖ ⇒ eₖ }) =
+       << let x = C(e);
+          if c₁ then (let b₁; C(e₁))
+          else if c₂ then (let b₂; C(e₂))
+          ...
+          else if cₖ then (let bₖ; C(eₖ))
+          else error (* impossible si le filtrage est exhaustif *)
+       >> où (cᵢ, bᵢ) = C(x, pᵢ)
+     #+END_SRC
+**** Optimisation du filtrage
+     C'est un sujet très important qu'on aura pas vraiment le temps d'aborder en
+     détail. S'il vous intéresse, l'article de Luc Maranget ci-dessous est
+     chaudement recommandé !
+
+     http://moscova.inria.fr/~maranget/papers/ml05e-maranget.pdf
+
+     Pour vous donner un avant-goût : comment compiler le programme suivant de
+     sorte à minimiser le nombre de tests ?
+
+  #+BEGIN_SRC ocaml
+      let f x y z =
+      match x, y, z with
+      | _, F, T -> 1
+      | F, T, _ -> 2
+      | _, _, F -> 3
+      | _, _, T -> 4
+  #+END_SRC
+
+      Avec la fonction de traduction écrire plus haut, on va générer du code qui
+      teste la même variable plusieurs fois sur le même chemin d'exécution.
+
+      #+BEGIN_SRC ocaml
+  if               y = F && z = T then 1
+  else if x = F && y = T          then 2
+  else if                   z = F then 3
+  else if                   z = T then 4
+  else error
+      #+END_SRC
+
+      On peut essayer de minimiser le nombre de tests en suivant la règle
+      suivante : *une même variable ne peut être testée qu'une seule fois* sur un
+      chemin d'exécution fixé.
+
+      Avec cette règle, le code généré dépend de l'ordre des tests. On peut par
+      exemple tester ~x~ puis ~y~ puis ~z~, ce qui aboutit au code suivant.
+
+      #+BEGIN_SRC ocaml
+  if x = T then
+    if y = T then
+       if z = T then 4 else 3
+    else (* y = F *) then
+       if z = T then 1 else 3
+  else (* x = F *)
+    if y = T then
+       2
+    else (* y = F *)
+       if z = T then
+         1
+       else (* z = F *)
+         3
+      #+END_SRC
+
+      D'autres ordres sont bien meilleurs, et permettent d'économiser les
+      tests. C'est par exemple le cas si on commence en testant ~y~.
+
+      #+BEGIN_SRC ocaml
+  if y = T then
+    if x = T then
+      if z = T then 4 else 3
+    else 2
+  else
+    if z = T then 1 else 3
+      #+END_SRC
+** Optimisations des fermetures
+   Les informations données précédemment suffisent à implémenter une traduction
+   correcte. En revanche, implémentée sans optimisations supplémentaires,
+   celle-ci est très inefficace. Pourquoi ?
+
+   1. On alloue potentiellement beaucoup de fermetures.
+
+   2. On fait beaucoup de sauts indirects.
+
+   De nombreuses solutions à ces problèmes ont été proposées au cours des
+   années, et certaines sont implémentées dans les compilateurs de langages
+   fonctionnels (notamment ~ocamlc~).
+*** Représentations des fermetures
+    À quoi ressemblent les fermetures allouées pour le code suivant ?
+
+    #+BEGIN_SRC ocaml
+let f x y u w =
+  let g () =
+    let h n =
+      let k m =
+        x + y + n
+      in
+      k u + n
+    in
+    h w
+  in g
+    #+END_SRC
+
+    Avec la représentation "plate" adoptée dans notre traduction :
+
+    |-------------------+------------------+-------------------|
+    | Fermeture pour... | Pointeur de code | Environnement     |
+    |-------------------+------------------+-------------------|
+    | g                 | g_fun            | E1 = [x, y, u, w] |
+    | h                 | h_fun            | E2 = [x, y, u]    |
+    | k                 | k_fun            | E3 = [x, y, n]    |
+    |-------------------+------------------+-------------------|
+
+    (Pourquoi avoir besoin de ~x~ et ~y~ dans h ?)
+
+    On constate qu'il y a beaucoup de redondance. Comment faire mieux ?
+
+    Avec du partage ! On appelle ça des /fermetures chaînées/.
+
+    |-------------------+------------------+-------------------|
+    | Fermeture pour... | Pointeur de code | Environnement     |
+    |-------------------+------------------+-------------------|
+    | g                 | g_fun            | E1 = [x, y, u, w] |
+    | h                 | h_fun            | E2 = [&E1]        |
+    | k                 | k_fun            | E3 = [&E2, n]     |
+    |-------------------+------------------+-------------------|
+
+    On peut ainsi économiser potentiellement beaucoup d'espace, au prix d'un
+    accès un peu plus coûteux aux valeurs dans l'environnement. On économise
+    aussi sur le temps de création de la fermeture.
+
+    Cette technique pose cependant un problème grave, qui est déclenché par
+    exemple dans le code ci-dessous. Pouvez-vous voir lequel ?
+
+    #+BEGIN_SRC ocaml
+let f a b =
+  let g c =
+    let h n = b + c + n in
+    h (List.hd a)
+  in
+  g
+
+let rec loop' k n =
+  if n <= 0
+  then k 0
+  else
+    let a = some_list_of_size n  in
+    let k' = f a in
+    loop' (fun r -> k (k' n r)) (n - 1)
+
+let loop = loop' (fun r -> r)
+    #+END_SRC
+
+    Quelle est la complexité en espace de ~loop' n~ ? A priori, linéaire : dans
+    le corps de ~loop'~ on fabrique une chaîne de ~n~ fermetures. Mais ici, les
+    listes ~a~ de taille ~n~ ne peuvent pas être libérées avant que ~loop'~
+    termine, puisqu'elles sont atteignables depuis les fermetures pour ~h~. La
+    complexité en espace est donc quadratique !
+
+    Shao et Appel ont proposé une solution à ce problème. Elle consiste à
+    introduire des environnements partagés de taille minimale pour factoriser
+    uniquement les variables qui sont *vraiment* partagées entre fermetures.
+    Lire leur article (URL ci-dessous) si la question vous intéresse.
+
+    https://flint.cs.yale.edu/flint/publications/escc.pdf
+
+    (Le compilateur OCaml utilise des fermetures à plat.)
+*** Gestion de l'application partielle
+    Comment va être traduit le code suivant ?
+
+    #+BEGIN_SRC ocaml
+let f x y z =
+  x + y + z
+
+let g =
+  fun x ->
+  print_string "hello";
+  fun y ->
+  print_string " world!\n";
+  fun z ->
+  x + y + z
+
+let h =
+  let r = ref 0 in
+  fun x y z ->
+    let n = !r + y + z in
+    r := x;
+    n
+
+let test () =
+  print_int (f 1 2 3);
+  print_int (g 1 2 3);
+  print_int (h 1 2 3)
+    #+END_SRC
+
+    Si on traduit tous les appels et fonctions anonymes uniformément, on va
+    faire payer le même coût aux trois appels. En particulier, il va falloir
+    allouer trois fermetures intermédiaires pour ~f~ et ~h~. Ce n'est pas
+    raisonnable dans un compilateur réaliste ; on voudrait réussir à compiler
+    les appels à ~f~ et ~h~ vers l'instruction ~call~ x86-64, en passant les
+    quatre arguments (1, 2 et 3 plus la fermeture) dans les registres.
+
+    On peut tout d'abord réaliser que ~f~ est une fonction top-level close, sans
+    environnement. On pourrait donc éviter de créer une fermeture et l'appeler
+    directement comme fonction connue. Attention : cette optimisation n'est
+    possible que parce qu'on a accès au corps de ~f~, ce qui nous permet de
+    vérifier que celui-ci est directement de la forme ~fun x y z -> ...~. Cette
+    optimisation n'est pas possible pour ~h~.
+
+    Une autre solution serait d'/inliner/ ~f~ dans son appelant. L'inlining est
+    simplement le fait de remplacer un appel de fonction dont le corps est connu
+    par le corps lui-même. Cela a l'avantage d'éviter un appel intermédiaire, et
+    surtout d'exposer plus de code aux optimiseurs du compilateur.
+
+    Pour optimiser ~h~, une solution employée par exemple dans le compilateur
+    OCaml est d'augmenter chaque fermeture avec l'arité de la fonction, et de
+    considérer une construction d'application n-aire (représentée dans l'AST par
+    un constructeur comme ~Eapply of exp * exp list~). Lors de l'exécution de
+    l'application N-aire ~e e1 e2 ... eN~, on commence par calculer la fermeture
+    ~c~ associée à l'expression ~e~, et par nommer ~x1 x2 ... N~ les résultats
+    de l'évaluation de ~e1 e2 ... eN~. Ensuite, on regarde le champ ~c.arity~ :
+
+    - si ~N = c.arity~ : on peut faire un appel à ~c.fun~ en passant tous les
+      arguments, sans créer de fermeture intermédiaire;
+
+    - si ~N < c.arity~ : on doit créer une fermeture qui attend ~c.arity - N~
+      arguments ~y1~, ... ~yM~, etc. et dont le corps appelle ~c.fun(c, v1, ...,
+      vN, y1, y2, ..., yM)~;
+
+    - si ~N > c.arity~ (on parle parfois de /surapplication/) : faire les
+      applications successives en créant les fermetures intermédiaires.
+
+    Un point important : on peut distinguer statiquement les applications
+    partielles, à partir de l'information de typage. C'est à dire qu'on sait
+    toujours si on est dans un cas ou ~N <= c.arity~ (application partielle
+    potentielle) ou ~N >= c.arity~ (surapplication potentielle). On a donc
+    besoin d'un seul test et pas deux.
