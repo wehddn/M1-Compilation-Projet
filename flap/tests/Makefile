@@ -4,7 +4,8 @@ JALONS=\
 	01-Parsing-no-positions.results \
 	02-Interpreter.results \
 	03-Typing.results \
-	04-Retrolix_to_x86-64.results
+	04-Retrolix_to_x86-64.results \
+	06-Hobix_to_Fopix.results
 EXTS=parsing.hopix parsing-no-positions.hopix eval.hopix typing.hopix \
 	hobix fopix retrolix
 

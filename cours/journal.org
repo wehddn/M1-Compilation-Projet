@@ -639,6 +639,1165 @@ and check_type_expression Γ e τ =
              movq $0, %rdi
              call exit
  #+END_SRC
-** Introduction au jalon 4
-   On présente rapidement la syntaxe de Retrolix, les différences vis-à-vis de
-   x86-64.
+** De Retrolix à x86-64
+*** Retrolix
+    Le code relatif à Retrolix est contenu dans
+    [[file://../flap/src/retrolix][src/retrolix/]]. Commencer par lire l'AST
+    présent dans ~retrolixAST.ml~, puis en cas de question, regarder la
+    sémantique de référence dictée par l'interprète dans retrolixInterpreter.ml.
+
+    Il s'agit d'un langage presque aussi bas niveau que l'assembleur, mais pas
+    tout à fait. Quelques caractéristiques :
+
+    - des registres (x86-64) *et* des variables (locales, globales, paramètres),
+
+    - le registre matériel %r15 est *réservé* (jamais utilisé),
+
+    - respecte la convention d'appel en ce qui concerne les registres (registres
+      caller-save vs. callee-save, registre stockant la valeur de retour),
+
+    - un jeu d'instruction bas niveau.
+
+    *Attention* : les six premiers arguments sont passés par %rdi, %rsi, %rdx,
+    %rcx, %r8, %r9. Donc les arguments déclarés et passés explicitement en
+    Retrolix sont ceux qui viennent des fonctions sources (Fopix) qui avaient
+    plus de six arguments au départ !
+
+*** x86-64
+    Le code est contenu dans [[file://../flap/src/x86-64][src/x86-64/]], et
+    l'AST qui nous intéresse est dans
+    [[file://../flap/src/x86-64/x86_64_AST.ml][x86_64_AST.ml]]. Pas d'interprète
+    ou parser.
+
+    On a vu les points saillants de l'assembleur x86-64 la dernière fois.
+
+    Remarque : comme on utilise GCC pour l'assemblage et l'édition de liens, nos
+    programmes assembleurs doivent disposer d'une fonction main().
+
+    *Attention* : l'AST est *trop permissif* ! Il permet d'écrire du code qui
+    n'assemble pas, par exemple ~movq (%rsp), (%rsp)~. Éviter de générer ce
+    genre de code fait partie de votre travail.
+
+*** Différences entre Retrolix et x86-64
+    - des chaînes litérales en Retrolix,
+
+    - en Retrolix, pas de fonction main(), le point d'entrée du programme est la
+      séquence des blocs d'initialisation de ses variables globales,
+
+    - pas de variables en x86-64,
+
+    - jeu d'instructions assez différent : Retrolix est plutôt RISC mais x86-64
+      est très CISC ; par exemple :
+
+      * trois adresses vs. deux adresses,
+
+      * modes d'adressage et opérandes mémoires limités en x86-64,
+
+      * bizarreries en x86-64, par exemple la division.
+* Cours 10 <2022-11-21>
+** De Retrolix à x86-64 (suite)
+*** Traduire Retrolix vers x86-64
+    Certaines des différences que nous venons de décrire ne sont pas
+    essentielles, et sont donc déjà traitées pour vous (chaînes litérales,
+    génération d'un main, ...). On va se concentrer sur deux points :
+
+    - la traduction des constructions Retrolix en assembleur x86-64,
+
+    - la gestion des variables et de la pile.
+
+    La passe de traduction est dans
+    [[file://../flap/src/x86-64/retrolixToX86_64.ml][retrolixToX86_64.ml]]. Vous
+    devez remplacer les ~failwith "Students!"~ avec le code approprié.
+
+    Il s'agit essentiellement d'implémenter deux modules, ~InstructionSelector~
+    et ~FrameManager~. Le premier se charge de la traduction de construction
+    atomiques de Retrolix en x86-64, le second de la gestion de la pile et des
+    variables. Le second va naturellement faire appel au premier.
+
+    *Attention* : dans ce jalon, on se concentrera sur la *correction* du code
+    généré. Produire du code optimisé est un objectif secondaire.
+**** Points à gérer
+***** Bases de la gestion de la pile
+      Considérons la fonction ci-dessous.
+
+#+BEGIN_SRC
+      def f(x, y)
+      local a, b, c:
+        ...
+      end
+#+END_SRC
+
+      En suivant l'ABI System V, à quoi doit ressembler son cadre de pile après
+      l'exécution de son prologue ? Quel est le code du prologue, d'ailleurs ?
+      De l'épilogue ?
+****** Indications
+
+     Prologue :
+
+#+BEGIN_SRC asm
+       pushq %rbp
+       movq %rsp, %rbp
+       subq $24, %rsp
+#+END_SRC
+
+     Épilogue :
+
+#+BEGIN_SRC asm
+       addq $24, %rsp
+       popq %rbp
+       ret
+#+END_SRC
+
+     Disposition de la pile :
+
+     | cadre parent |        |
+     |--------------+--------|
+     | arg y        |        |
+     | arg x        |        |
+     | saved %rip   |        |
+     | saved %rbp   | <- rbp |
+     | var a        |        |
+     | var b        |        |
+     | var c        | <- rsp |
+
+     Notons que l'ABI nous laisse le choix de l'ordre des variables locales.
+
+***** Bases de la traduction
+      Comment traduire les instructions Retrolix suivantes ?
+
+#+BEGIN_SRC asm
+        %rax <- load 42;
+#+END_SRC
+
+#+BEGIN_SRC asm
+        %rax <- add %rax, %rbx;
+#+END_SRC
+
+#+BEGIN_SRC asm
+        %rax <- add %rbx, %rcx;
+#+END_SRC
+
+#+BEGIN_SRC asm
+        %rax <- div %rbx, %rcx;
+#+END_SRC
+
+      Comment traduire l'instruction suivante, si a est une variable locale (par
+      exemple la première) ? Le premier paramètre de la fonction Retrolix
+      courante ? Une variable globale ?
+
+#+BEGIN_SRC asm
+         a <- load 42;
+#+END_SRC
+
+      Dans les instructions ci-dessous, on se place dans le corps d'une fonction
+      dont les variables locales sont a, b et c, déclarées dans cet ordre.
+
+#+BEGIN_SRC asm
+         %rax <- add %rax, a;
+#+END_SRC
+
+#+BEGIN_SRC asm
+         a <- add a, %rax;
+#+END_SRC
+
+#+BEGIN_SRC asm
+         a <- add a, b;
+#+END_SRC
+
+#+BEGIN_SRC asm
+         a <- add b, c;
+#+END_SRC
+
+****** Indications
+       Pour les instructions élémentaires :
+
+#+BEGIN_SRC asm
+        movq $42, %rax
+#+END_SRC
+
+#+BEGIN_SRC asm
+        addq %rbx, %rax
+#+END_SRC
+
+#+BEGIN_SRC asm
+        movq %rbx, %rax
+        addq %rcx, %rax
+#+END_SRC
+
+#+BEGIN_SRC asm
+        movq %rdx, %r15
+        movq %rbx, %rax
+        cqto
+        idivq %rcx
+        mocq %r15, %rdx
+#+END_SRC
+
+      Traduction de ~a <- load 42~ lorsque ~a~ est :
+
+      - la première variable locale dans la pile
+
+#+BEGIN_SRC asm
+         movq $42, -8(%rbp)
+#+END_SRC
+
+      - un paramètre Retrolix (le premier)
+
+#+BEGIN_SRC asm
+         movq $42, 16(%rbp)
+#+END_SRC
+
+      - une variable globale, stockée au label ~a~
+
+#+BEGIN_SRC asm
+         movq $42, a
+#+END_SRC
+
+      La traduction du reste des exemples :
+
+#+BEGIN_SRC asm
+         addq -8(%rbp), %rax
+#+END_SRC
+
+#+BEGIN_SRC asm
+         addq %rax, -8(%rbp)
+#+END_SRC
+
+#+BEGIN_SRC asm
+         movq -16(%rbp), %r15
+         addq %r15, -8(%rbp)
+#+END_SRC
+
+#+BEGIN_SRC asm
+         movq -24(%rbp), %r15
+         addq -16(%rbp), %r15
+         movq %r15, -8(%rbp)
+#+END_SRC
+
+***** Convention d'appel
+
+      Comment traduire les appels de fonction ?
+
+#+BEGIN_SRC asm
+      def f()
+        call g(23, %rax, %rbx)
+#+END_SRC
+
+      N'oubliez pas qu'il faut aussi traiter les appels de fonction *terminaux*.
+
+****** Indications
+
+#+BEGIN_SRC asm
+f:     pushq %rbp
+       movq %rsp, %rbp
+       subq $8, %rsp    # sert à aligner la pile sur 16 octets pour le call
+       pushq %rbx       # argument 3
+       pushq %rax       # argument 2
+       pushq $23        # argument 1
+       call g           # appel (la pile est bien alignée sur 16 octets !)
+       addq $32, %rsp   # libère les arguments sur la pile
+       movq %rbp, %rsp
+       popq %rbp
+       ret
+#+END_SRC
+
+#+BEGIN_SRC asm
+      def f()
+        call g(23, %rax, %rbx) tail
+#+END_SRC
+** De Fopix à Retrolix
+*** Présentation de Fopix
+    Lecture de l'AST Fopix présent dans le fichier
+    [[file://../flap/src/fopix/fopixAST.ml][fopixAST.ml]].
+*** Fopix et Retrolix, similarités et différences
+**** Similarités
+    - Langages de premier ordre avec possibilité de saut indirect.
+
+    - Litéraux identiques.
+**** Différences
+    - Retrolix a des registres machines.
+
+    - Retrolix suit la convention d'appel machine.
+
+    - Fopix est un langage à base d'expressions de profondeur arbitraire plutôt
+      que d'instructions au format trois adresses.
+
+    - Fopix a des && et des || court-circuits.
+
+    - Fopix dispose d'instructions de gestion du flot de contrôle structurées.
+
+    - Fopix a des déclarations locales internes aux fonctions, tandis que
+      Retrolix ne dispose que d'un espace de nom pour toute fonction (ou
+      initialiseur de variable globale).
+
+    - Plus subtil : Fopix accède à la mémoire à travers des blocs. La syntaxe
+      concrète des affectations prend la forme ~block_e[index_e] := val_e~
+      tandis que les déréférences prennent la forme ~block_e[index_e]~. Ces
+      constructions sont traduites vers des appels à ~write_block()~ et
+      ~read_block()~ dans la syntaxe abstraite, cf. ~fopixInterpreter.ml~.
+**** Aparté : un détail négligé en Retrolix et x86-64
+     Les programmes que nous allons compiler vont reposer sur un exécutif
+     (/runtime/), c'est à dire du code d'infrastructure.
+
+     En ce qui nous concerne, ce /runtime/ prendra la forme d'un fichier écrit
+     en C et concernera notamment des fonctions utiles à la gestion mémoire.
+
+ #+BEGIN_SRC C
+       location_t allocate_block(int64_t size);
+       value_t read_block(location_t block, int64_t index);
+       void write_block(location_t block, int64_t index, value_t v);
+ #+END_SRC
+
+     Il contient aussi du code d'entrée/sortie, ou de comparaisons de certains
+     types de données (notamment les chaînes de caractères).
+
+     *Attention* : la grande différence entre le tas et la pile, en termes de
+     gestion de la mémoire, est que les données sur la pile sont libérées
+     automatiquement en fonction du flot de contrôle (une fonction libère son
+     cadre de pile quand elle retourne à son appelant). Pour libérer la mémoire
+     du tas, on utilise typiquement un /garbage-collector/ (ou ramasse-miettes,
+     ou glanneur de cellules).
+
+     (Flap ne comprend pas de ramasse-miettes actuellement.)
+
+     Un ramasse-miettes parcourt la mémoire pour détecter si des blocs de
+     mémoire ne sont plus /atteignables/. Un bloc est /atteignable/ si l'on peut
+     obtenir son adresse en lisant des pointeurs depuis les registres et la
+     pile. Un bloc qui n'est pas atteignable peut être libéré, puisque notre
+     programme ne pourra plus jamais y accéder.
+*** Quelles sont les difficultés de la traduction de Fopix en Retrolix ?
+**** Passage des expressions au code à trois adresses ; structures de contrôle
+    Comment compiler vers Retrolix les expressions Fopix suivantes ?
+
+    On supposera que le résultat de chaque expression doit être stocké vers une
+    variable locale baptisée "r" et, bien sûr, utiliser autant de variables
+    locales que nécessaire (elles sont là pour ça).
+
+    À ce stade, on ne cherche pas *du tout* à optimiser le code, mais plutôt à
+    trouver un schéma de compilation mécanique qui soit facile à implémenter.
+
+    ~1 - (3 * 4)~
+
+    ~x >= 0~
+
+    ~if x = 0 then 0 else y / x~
+
+    ~(while (x[0] >= 0) (x[0] := x[0] - 1)); x[0]~
+**** Solutions
+     Toute instruction Retrolix doit être précédée d'une étiquette, mais on les
+     omet ci-dessous les étiquettes superflues. Tous les ~xI~ sont des variables
+     locales préalablement déclarées.
+
+     Premier exemple :
+
+#+BEGIN_SRC
+       x1 <- copy 1;
+       x2 <- copy 3;
+       x3 <- copy 4;
+       x4 <- mul x2, x3;
+       r  <- add x1, x4;
+#+END_SRC
+
+     Troisième exemple :
+
+#+BEGIN_SRC
+       x1 <- copy 1;
+       x2 <- copy x;
+       x3 <- eq x1, x2;
+       jumpif eq x3, 0 -> lE, lT
+   lT: r <- copy 0;
+       jmp lK:
+   lE: x4 <- y;
+       x5 <- x;
+       r <- div x4, x5;
+   lK:
+#+END_SRC
+
+     Deuxième exemple :
+
+#+BEGIN_SRC
+       lT: x1 <- read_block(x, 0);
+           x2 <- copy 0;
+           x3 <- gte x1, x2;
+           jumpif eq x3, 0 -> lK, lB
+       lB: x4 <- read_block(x, 0);
+           x5 <- sub x4, 1;
+           write_block(x, 0, x5);
+           jump lT
+       lK: r <- read_block(x, 0);
+#+END_SRC
+
+     *Remarque* : ces solutions sont volontairement naïves. Un attrait des
+     compilateurs optimisants est de permettre, au moins dans une certaine
+     mesure, de séparer la correction de l'efficicacité. Concrètement, on peut
+     générer du code simple qui sera optimisé par une passe ultérieure. En
+     particulier, le code montré ci-dessus peut être facilement généré par une
+     fonction récursive.
+* Cours 11 <2022-11-28>
+** De Fopix à Retrolix, suite
+*** Les difficultés de la traduction, suite
+**** Passage à la convention d'appel de la machine
+     Fopix dispose du mécanisme d'appel de fonction usuel des langages de
+     programmation de haut niveau. Celui-ci est indépendant de l'architecture
+     cible. À l'inverse, Retrolix respecte la convention d'appel de x86-64. Une
+     étape de la traduction est donc d'implémenter cette traduction.
+
+     Pouvez-vous rappeler la convention d'appel POSIX System-V x86-64 ?
+
+     Les six premiers arguments sont passés dans les registres %rdi, %rsi, %rdx,
+     %rcx, %r8 et %r9, les suivants sont passés par la pile de droite à gauche.
+
+     (Cette convention ne concerne que les valeurs entières et pas les flottants
+     ni les valeurs occupant plus d'un mot machine. Ces derniers cas ne peuvent
+     pas se produire dans flap.)
+
+     Remarquons que la pile n'est pas encore explicite en Retrolix, qui dispose
+     donc d'un mécanisme de passage d'arguments dédié. C'est la passe de
+     Retrolix vers x86-64 qui explicite le passage des arguments, comme vous
+     l'avez vu lors des cours précédents.
+
+     Comment traduire les expressions suivantes ?
+
+     #+BEGIN_SRC
+     f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     f(1, 2 + 3)
+     #+END_SRC
+
+     #+BEGIN_SRC
+     12 + f(3 * 8)
+     #+END_SRC
+
+      #+BEGIN_SRC
+      f(1, 2, 3, y, 5, 6, 40 + 2)
+      #+END_SRC
+**** Solutions
+     #+BEGIN_SRC
+     call f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 1
+     x2 <- copy 2
+     x3 <- copy 3
+     x4 <- add x2, x3
+     %rdi <- copy x1
+     %rsi <- copy x4
+     call f()
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 1
+     x2 <- copy 2
+     x3 <- copy 3
+     x4 <- copy y
+     x5 <- copy 5
+     x6 <- copy 6
+     x7 <- copy 40
+     x8 <- copy 2
+     x9 <- add x7, x8
+     %rdi <- copy x1
+     %rsi <- copy x2
+     %rdx <- copy x3
+     %rcx <- copy x4
+     %r8  <- copy x5
+     %r9  <- copy x6
+     call f(x9)
+     #+END_SRC
+
+     #+BEGIN_SRC
+     x1 <- copy 12
+     x2 <- copy 3
+     x3 <- copy 8
+     x4 <- add x2, x3
+     %rdi <- copy x4
+     call f()
+     x5 <- copy %rax
+     x6 <- add x1, x5
+     #+END_SRC
+** De Hobix à Fopix
+*** Présentation de Hobix
+    Voir [[file://../flap/src/hobix/hobixAST.ml][hobixAST.ml]].
+
+    Quelles similarités et différences distinguez-vous entre Hobix et Fopix ?
+
+    Les langages sont identiques à quelques exceptions près :
+
+    - Fopix ne dispose pas de ~read/write/allocate_block()~ ad-hoc ;
+
+    - En Hobix, les fonctions sont des valeurs, et on a une construction ~apply~
+      générique (la fonction est une expression quelconque), et surtout une
+      construction de fonction anonyme dans les expressions ;
+
+    - Les littéraux de Fopix comprennent, en plus de ceux de Hobix, un nom de
+      fonction ~LFun f~ (qui doit être compris comme un pointeur vers ~f~).
+
+    En d'autres termes, en Hobix les fonctions sont *de première classe*, comme
+    en OCaml, tandis que Fopix ne dispose que de pointeurs de code, comme en C.
+
+    Pour traduire Hobix vers Fopix, il faut donc ramener les constructions de
+    bloc à des appels de fonctions génériques, mais surtout éliminer les
+    fonctions de première classe. On va suivre l'approche vue durant le cours
+    d'introduction à la sémantique, avec une passe dite d'/explicitation des
+    fermetures/ (ou /closure conversion/ en anglais).
+*** L'explication des fermetures
+    Comment traduire les programmes OCaml suivants en C ? Comme d'habitude, on
+    cherche une traduction mécanique et locale (expression par expression),
+    comme le ferait un compilateur !
+
+    On choisit le format suivant pour les fermetures.
+
+    |------------------+------------------+------------------+-----|
+    | pointeur de code | variable libre 0 | variable libre 2 | ... |
+    |------------------+------------------+------------------+-----|
+    | clo[0]           | clo[1]           | clo[2]           | ... |
+    |------------------+------------------+------------------+-----|
+
+**** Fonctions anonymes
+      Les exemples ci-dessous visent à vous rappeler qu'une fonction n'est pas
+      qu'un pointeur de code.
+       #+BEGIN_SRC ocaml
+ let f0 z =
+   let y = z * 2 in
+   fun x -> x + y + z
+       #+END_SRC
+
+       #+BEGIN_SRC ocaml
+ let f1 y =
+   let g = fun x -> x + y in
+   let h = fun x -> 2 * x in
+   if y > 0 then g else h
+       #+END_SRC
+***** Solutions
+       *Remarque* : les solutions écrites en pseudo-C ci-dessous sont données
+       dans un but pédagogique. Les détails sont volontairement simplifiés par
+       rapport à ce une traduction d'OCaml vers C complète.
+
+       #+BEGIN_SRC C
+ int f0_anon0(block_t *clo, int x) {
+   return x + clo[1] + clo[2];
+ }
+
+ block_t *f0(int z) {
+   block_t *clo = allocate_block(3);
+   int y = z * 2;
+   clo[0] = &f0_anon0;
+   clo[1] = y;
+   clo[2] = z;
+   return clo;
+ }
+       #+END_SRC
+
+       #+BEGIN_SRC C
+ int f1_anon0(block_t *clo, int x) {
+   return x + clo[1];
+ }
+
+ int f1_anon1(block_t *clo, int x) {
+   return 2 * x;
+ }
+
+ block_t *f1(int y) {
+   block_t *clo = allocate_block(2);
+   if (y > 0) {
+     clo[0] = &f0_anon0;
+     clo[1] = y;
+   } else {
+     clo[0] = &f0_anon1;
+   }
+   return clo;
+ }
+       #+END_SRC
+
+       *Attention* : dans le code ci-dessus, on a traité les appels aux
+       fonctions top-level de manière spéciale (on a pas fabriqué de fermeture
+       pour elles puisqu'elles sont nécessairement closes !). C'est une
+       optimisation importante mais que vous ne réaliserez sans doute pas dans
+       le jalon.
+**** Applications
+      #+BEGIN_SRC ocaml
+ let f2 x =
+   let f = f0 4 in
+   f x
+      #+END_SRC
+
+***** Solution
+      #+BEGIN_SRC C
+ void f2(int x) {
+   block_t *clo = f0(4);
+   return clo[0](clo, x);
+ }
+      #+END_SRC
+
+      Notez qu'ici aussi, on a supposé que f0 était une fonction connue, et on
+      l'a implémentée par un appel direct plutôt que par un appel indirect et
+      une fermeture.
+**** Schéma général de la traduction
+     À quoi ressemble la traduction précédente, si on veut générer du Fopix ?
+
+     Le pseudo-code ci-dessous exprime la fonction de compilation C(-) qui prend
+     une expression Hopix e et lui associe une expression Fopix C(e).
+
+      #+BEGIN_SRC
+ C(e₁ e₂) = soit c et x des identifiants frais
+            << val c = C(e₁);
+               val x = C(e₂);
+               call c[0] with (c, x) >>
+
+ C(fun x₁ ... xₖ → e) = soit { y₁, ..., yₗ } = FV(fun (x₁, ..., xₖ) → e),
+                        soit "fresh_name" un nom de fonction frais,
+                        l'expression est traduite vers :
+                          << val c = allocate_block (l + 1);
+                             c[0] := &fresh_name;
+                             c[1] := y₁;
+                             c[2] := y₂;
+                             ...
+                             c[l] := yₗ;
+                             c >>
+                        et on ajoute une fonction top-level :
+                          << def fresh_name(clo, x₁, ..., xₖ) =
+                             C(e)[y₁ \ clo[1], ..., yₗ \ clo[l]] >>
+
+      #+END_SRC
+
+      Il reste cependant une question en suspend : celle de la récursion.
+**** La récursion
+***** Simple
+       Comment traduire l'exemple ci-dessous, par exemple ?
+ #+BEGIN_SRC ocaml
+ let rec repeat n f =
+   let rec aux n = if n > 0 then (f n; aux (n - 1)) in
+   aux n
+ #+END_SRC
+****** Solution 1
+       Quand on compile le corps de ~aux~, on connaît le nom de la fonction
+       Fopix qui correspond. On peut donc spécialiser la traduction pour
+       remplacer l'appel récursif à ~aux~ par un appel direct à la fonction
+       traduite.
+****** Solution 2
+       On peut mimer l'interprète du jalon 3 et produire une fermeture cyclique.
+       On voit donc l'occurrence récursive de ~aux~ comme une variable libre.
+
+       #+BEGIN_SRC C
+ void repeat_aux(block_t *clo, int n) {
+   if (n > 0) {
+     clo[1][0](clo[1], n);
+     clo[2][0](clo[2], n - 1);
+   }
+ }
+
+ void repeat(int n, block_t *clo_f) {
+   block_t *clo = allocate_block(3);
+   clo[0] = &repeat_aux;
+   clo[1] = clo_f;
+   clo[2] = clo;
+   clo[0](clo, n);
+ }
+       #+END_SRC
+***** TODO Mutuelle
+      À traduire pour la prochaine fois.
+       #+BEGIN_SRC ocaml
+let repeat_alt n f =
+  let rec odd k =
+    if k < 0 then () else (f true; even (k - 1))
+  and even k =
+    if k < 0 then () else (f false; odd (k - 1))
+  in
+  if k mod 2 = 0 then even k else odd k
+       #+END_SRC
+* Cours 12 <2022-12-05>
+** De Hobix à Fopix, suite et fin
+*** Schéma général de la traduction
+**** Récursion
+***** Mutuelle
+       #+BEGIN_SRC ocaml
+ let repeat_alt n f =
+   let rec odd k =
+     if k < 0 then () else (f true; even (k - 1))
+   and even k =
+     if k < 0 then () else (f false; odd (k - 1))
+   in
+   if n mod 2 = 0 then even n else odd n       #+END_SRC
+****** Solution
+       On peut appliquer les mêmes techniques que pour la récursion simple.
+
+ #+BEGIN_SRC
+ void repeat_alt_odd(block_t *clo, int k) {
+   if (k >= 0) {
+     clo[1][0](clo[1], 1);
+     clo[2][0](clo[2], k - 1);
+   }
+ }
+
+ // repeat_alt_even est similaire
+ ...
+
+ void repeat_alt(int n, block_t *clo_f) {
+   block_t *clo_odd = allocate_block(3);
+   block_t *clo_even = allocate_block(3);
+   clo_odd[0] = &repeat_alt_odd;
+   clo_odd[1] = clo_f;
+   clo_odd[2] = clo_even;
+   clo_even[0] = &repeat_alt_even;
+   clo_even[1] = clo_f;
+   clo_even[2] = clo_odd;
+   if (n % 2 == 0) {
+     clo_even[0](clo_even, n);
+   } else {
+     clo_odd[0](clo_odd, n);
+   }
+ }
+ #+END_SRC
+       On peut également suivre OCaml et produire une unique fermeture qui
+       partage les pointeurs de toutes les fonctions mutuellement récursives et
+       l'union des variables libres de ces fonctions.
+
+       Quel est l'avantage de cette deuxième solution ? Économiser de l'espace
+       sur l'environnement.
+** De Hopix à Hobix
+   (Cette étape n'est pas couverte par un jalon.)
+
+   Comme pour les passes de traduction précédentes, on va commencer par chercher
+   les similarités et différences entre Hopix et Hobix. Quelles sont-elles ?
+
+   La principale est qu'Hopix dispose de données structurées : références,
+   enregistrements, types sommes, types n-uplets. À l'inverse, Hobix n'a que des
+   constructions d'allocation/création/modification de blocs. De plus, Hobix n'a
+   pas de boucle dénombrée (~for~) mais seulement une boucle ~while~. Enfin,
+   Hobix n'a pas de construction de séquencement (~e₁; ...; eₖ~) dédiée.
+
+   La traduction doit donc éliminer les boucles ~for~, mais également les
+   constructeurs et destructeurs des types structurés.
+
+   |----------------+----------------------------------+--------------------|
+   | Type           | Constructeur                     | Destructeur        |
+   |----------------+----------------------------------+--------------------|
+   | Référence      | ref e_init                       | !e                 |
+   | $N$-uplet      | (e$_1$, ..., e$_N$)              | match e with ...   |
+   | Enregistrement | { f1 = e$_1$; ...; fN = e$_N$; } | e.f$_i$ (ou match) |
+   | Type somme     | K (e1, ..., eN)                  | match e with ...   |
+   |----------------+----------------------------------+--------------------|
+
+   (Pour les références, ne pas oublier l'assignation, qui n'est ni un
+   constructeur ni un destructeur.)
+*** Traduction des boucles ~for~
+    À votre avis, vers quelle construction Hobix est-il naturel de traduire les
+    boucles ~for~ de Hopix ?
+
+    La boucle ~while~, bien sûr !
+
+    Proposons une traduction générale. Comme précédemment, on écrira C(-) pour
+    la fonction de traduction, i.e., /C(e)/ sera le traduit de /e/.
+
+#+BEGIN_SRC
+C(for x in (lo to hi) { body }) =
+  << let cpt = allocate_block(1);
+     let h = C(hi);
+     cpt[0] := C(lo);
+     while (cpt[0] <= h) {
+       let x = cpt[0];
+       C(body);
+       cpt[0] := cpt[0] + 1;
+     } >> où cpt et h sont fraîches.
+#+END_SRC
+*** Traduction du séquencement
+#+BEGIN_SRC
+C(e₁ ; e₂ ; ... ; eₖ) = << val _ = C(e₁); val _ = C(e₂); ...; C(eₖ) >>
+#+END_SRC
+*** Traduction des types référence
+    Première question : quelle représentation sous forme d'un bloc ?  On peut se
+    contenter d'un bloc de taille 1, qui stocke le contenu de la référence.
+
+    Pourquoi ?
+
+    Parce que toutes les données qu'on va manipuler occupent exactement un
+    mot. Cela provient du fait qu'on manipule soit des entiers machines, soit
+    des booléens manipulés comme des entiers (c'est une perte de place qui nous
+    simplifie néanmoins la vie), soit des pointeurs (y compris des adresses de
+    bloc). Par exemple, une référence qui contient un n-uplet va être
+    implémentée par un bloc de taille 1 dont l'unique cellule contient l'adresse
+    du bloc qui lui même stocke le contenu du N-uplet.
+
+#+BEGIN_SRC
+C(ref e) = << let x = allocate_block(1); x[0] := C(e); x >> où x est frais
+#+END_SRC
+
+#+BEGIN_SRC
+C(!e) = << C(e)[0] >>
+#+END_SRC
+
+#+BEGIN_SRC
+C(e₁ := e₂) = << C(e₁)[0] := C(e₂) >>
+#+END_SRC
+*** Traduction des types enregistrement
+    Quelle représentation ? Un bloc de taille N, où N est le nombre de champs de
+    l'enregistrement.
+
+    La traduction suppose qu'on a fixé un ordre d'énumération quelconque des
+    champs : f1, f2, ... jusqu'à fN. En pratique, on peut prendre l'ordre de
+    déclaration, mais cet ordre n'a pas d'importance.
+
+    On va supposer qu'on a une fonction IDX(f) qui associe au champ f un indice.
+    Il peut être calculé lors de la définition du type correspondant.
+
+    (Pourquoi ? Parce le code source Hopix n'est pas capable de l'observer.)
+
+#+BEGIN_SRC
+C({ f1 = e1; ...; fN = eN; }) = << let x = allocate_block(N) in
+                                   x[IDX(f1)] := C(e1);
+                                   ...;
+                                   x[IDX(fN)] := C(eN);
+                                   x >> où x est frais
+#+END_SRC
+
+     *Attention* : si l'ordre n'importe pas, dans la traduction ci-dessus, il
+     est important qu'on fasse le calcul de eᵢ avant eᵢ₊₁ pour respecter la
+     sémantique de Hopix !
+
+#+BEGIN_SRC
+C(e.f) = C(e)[IDX(f)]
+#+END_SRC
+*** Traduction des n-uplets
+    Une simple variation sur les enregistrements, à la différence que l'ordre
+    des champs est fixé.
+*** Traduction des types sommes
+    Supposons qu'on ait le type Hopix suivant (syntaxe OCaml).
+
+    #+BEGIN_SRC
+type t =
+  | Empty
+  | Leaf of int
+  | Node of t * t
+    #+END_SRC
+    Quelle représentation sous forme de bloc adopter pour ses constructeurs ?
+
+    On doit toujours avoir au moins une cellule dans le bloc, pour distinguer le
+    constructeur dont il s'agit. Celle-ci contient une étiquette (/tag/), qui
+    associe un entier unique à chaque constructeur (comme pour la fonction IDX()
+    des enregistrements, elle peut être calculée à la définition du type). En
+    plus du tag, on a besoin d'autant d'espace que le constructeur a de
+    paramètres : 0 pour ~Empty~, 1 pour ~Leaf~ et 2 pour ~Node~.
+
+    Plus généralement, si le constructeur Kᵢ a kᵢ paramètres, on a besoin d'un
+    bloc de taille 1 + kᵢ pour le représenter.
+
+    #+BEGIN_SRC
+C(K (e_1, ..., e_kᵢ)) = << let x = allocate_block (1 + kᵢ);
+                           x[0] := TAG(i);
+                           x[1] := C(e_1);
+                           ...
+                           x[1 + kᵢ] := C(e_kᵢ);
+                           x >> où x est frais
+    #+END_SRC
+*** Traduction du filtrage de motifs
+    La traduction du filtrage de motif est plus subtile que celle des
+    constructions précédentes, puisque le filtrage est une construction très
+    expressive qui permet simultanément de déstructurer une valeur, lier des
+    variables, discriminer entre plusieurs cas, etc.
+    Comment traduire l'exemple suivant ?
+
+    #+BEGIN_SRC
+def len (l) =
+  case l {
+  | Nil => 0
+  | Cons (_, xs) => 1 + len (xs)
+  }
+     #+END_SRC
+
+     #+BEGIN_SRC
+def len (l) =
+   if l[0] = 0 then
+     0
+   else
+     let xs = l[2] in
+     1 + len (xs)
+     #+END_SRC
+
+     On rappelle que le filtrage est de la forme ~match e { b1 | ... | bN }~ où
+     chaque ~bᵢ~ est une /branche/, c'est à dire de la forme ~p ⇒ e~, où ~p~ est
+     un motif. Pouvez-vous rappeler les formes de motifs possibles ?
+
+     Il s'agit des :
+
+     - variables,
+     - attrape-tout (/wildcard/ en anglais),
+     - annotations de types,
+     - constantes littérales,
+     - constructeur de types sommes,
+     - n-uplets,
+     - enregistrement,
+     - motif ET,
+     - motif OU.
+
+     L'approche la plus simple est de traduire le filtrage vers une séquence de
+     conditionnelles et déclarations locales imbriquées.
+
+     On peut commencer par éliminer les motifs OU, en les ramenant à des
+     branches supplémentaires dans la construction de filtrage initiale.
+     (Pouvez-vous expliciter cette traduction ?)
+
+     Comment formuleriez-vous la traduction d'un motif ? On traduit vers :
+
+     1. une expression booléenne qui dit si la valeur discriminée est filtrée,
+
+     2. une liste de liaisons identifiant → expression qui indique, le cas
+        échéant, quelles variables ont été liées.
+
+     La fonction de traduction des motifs prend en paramètre le motif /p/ mais
+     également l'expression /d/ dont on veut filtrer le résultat.
+
+     #+BEGIN_SRC
+                         C(d, x) = (~true~, [ ~x = d~ ])
+                         C(d, _) = (~true~, [ ])
+                   C(d, p : ann) = C(d, p)
+                         C(d, l) = (~d = l~, [ ])
+             C(d, K(p₁, ..., pₖ) = (~c₁ && ... && cₖ && d[0] = TAG(K)~,
+                                    b₁ @ ... @ bₖ) où (cᵢ, bᵢ) = C(~d[i]~, pᵢ)
+           C(d, ⟨ p₁, ... , pₖ ⟩) = (~c₁ && ... && cₖ~, b₁ @ ... @ bₖ)
+                                   où (cᵢ, bᵢ) = C(~d[i-1]~, pᵢ)
+ C(d, { l₁ = p₁; ... ; lₖ = pₖ }) = (~c₁ && ... && cₖ~, b₁ @ ... @ bₖ)
+                                   où (cᵢ, bᵢ) = C(~d[IDX(lᵢ)]~, pᵢ)
+                                   en supposant l₁, ..., lₖ dans le bon ordre !
+                C(d, (p₁ && p₂)) = (~c₁ && c₂~, b₁ @ b₂)
+                                   où (cᵢ, bᵢ) = C(~d~, pᵢ)
+     #+END_SRC
+
+     La traduction du filtrage lui même est ensuite facile à formuler.
+
+     #+BEGIN_SRC
+     C(match e { p₁ ⇒ e₁ | ... | pₖ ⇒ eₖ }) =
+       << let x = C(e);
+          if c₁ then (let b₁; C(e₁))
+          else if c₂ then (let b₂; C(e₂))
+          ...
+          else if cₖ then (let bₖ; C(eₖ))
+          else error (* impossible si le filtrage est exhaustif *)
+       >> où (cᵢ, bᵢ) = C(x, pᵢ)
+     #+END_SRC
+**** Optimisation du filtrage
+     C'est un sujet très important qu'on aura pas vraiment le temps d'aborder en
+     détail. S'il vous intéresse, l'article de Luc Maranget ci-dessous est
+     chaudement recommandé !
+
+     http://moscova.inria.fr/~maranget/papers/ml05e-maranget.pdf
+
+     Pour vous donner un avant-goût : comment compiler le programme suivant de
+     sorte à minimiser le nombre de tests ?
+
+  #+BEGIN_SRC ocaml
+      let f x y z =
+      match x, y, z with
+      | _, F, T -> 1
+      | F, T, _ -> 2
+      | _, _, F -> 3
+      | _, _, T -> 4
+  #+END_SRC
+
+      Avec la fonction de traduction écrire plus haut, on va générer du code qui
+      teste la même variable plusieurs fois sur le même chemin d'exécution.
+
+      #+BEGIN_SRC ocaml
+  if               y = F && z = T then 1
+  else if x = F && y = T          then 2
+  else if                   z = F then 3
+  else if                   z = T then 4
+  else error
+      #+END_SRC
+
+      On peut essayer de minimiser le nombre de tests en suivant la règle
+      suivante : *une même variable ne peut être testée qu'une seule fois* sur un
+      chemin d'exécution fixé.
+
+      Avec cette règle, le code généré dépend de l'ordre des tests. On peut par
+      exemple tester ~x~ puis ~y~ puis ~z~, ce qui aboutit au code suivant.
+
+      #+BEGIN_SRC ocaml
+  if x = T then
+    if y = T then
+       if z = T then 4 else 3
+    else (* y = F *) then
+       if z = T then 1 else 3
+  else (* x = F *)
+    if y = T then
+       2
+    else (* y = F *)
+       if z = T then
+         1
+       else (* z = F *)
+         3
+      #+END_SRC
+
+      D'autres ordres sont bien meilleurs, et permettent d'économiser les
+      tests. C'est par exemple le cas si on commence en testant ~y~.
+
+      #+BEGIN_SRC ocaml
+  if y = T then
+    if x = T then
+      if z = T then 4 else 3
+    else 2
+  else
+    if z = T then 1 else 3
+      #+END_SRC
+** Optimisations des fermetures
+   Les informations données précédemment suffisent à implémenter une traduction
+   correcte. En revanche, implémentée sans optimisations supplémentaires,
+   celle-ci est très inefficace. Pourquoi ?
+
+   1. On alloue potentiellement beaucoup de fermetures.
+
+   2. On fait beaucoup de sauts indirects.
+
+   De nombreuses solutions à ces problèmes ont été proposées au cours des
+   années, et certaines sont implémentées dans les compilateurs de langages
+   fonctionnels (notamment ~ocamlc~).
+*** Représentations des fermetures
+    À quoi ressemblent les fermetures allouées pour le code suivant ?
+
+    #+BEGIN_SRC ocaml
+let f x y u w =
+  let g () =
+    let h n =
+      let k m =
+        x + y + n
+      in
+      k u + n
+    in
+    h w
+  in g
+    #+END_SRC
+
+    Avec la représentation "plate" adoptée dans notre traduction :
+
+    |-------------------+------------------+-------------------|
+    | Fermeture pour... | Pointeur de code | Environnement     |
+    |-------------------+------------------+-------------------|
+    | g                 | g_fun            | E1 = [x, y, u, w] |
+    | h                 | h_fun            | E2 = [x, y, u]    |
+    | k                 | k_fun            | E3 = [x, y, n]    |
+    |-------------------+------------------+-------------------|
+
+    (Pourquoi avoir besoin de ~x~ et ~y~ dans h ?)
+
+    On constate qu'il y a beaucoup de redondance. Comment faire mieux ?
+
+    Avec du partage ! On appelle ça des /fermetures chaînées/.
+
+    |-------------------+------------------+-------------------|
+    | Fermeture pour... | Pointeur de code | Environnement     |
+    |-------------------+------------------+-------------------|
+    | g                 | g_fun            | E1 = [x, y, u, w] |
+    | h                 | h_fun            | E2 = [&E1]        |
+    | k                 | k_fun            | E3 = [&E2, n]     |
+    |-------------------+------------------+-------------------|
+
+    On peut ainsi économiser potentiellement beaucoup d'espace, au prix d'un
+    accès un peu plus coûteux aux valeurs dans l'environnement. On économise
+    aussi sur le temps de création de la fermeture.
+
+    Cette technique pose cependant un problème grave, qui est déclenché par
+    exemple dans le code ci-dessous. Pouvez-vous voir lequel ?
+
+    #+BEGIN_SRC ocaml
+let f a b =
+  let g c =
+    let h n = b + c + n in
+    h (List.hd a)
+  in
+  g
+
+let rec loop' k n =
+  if n <= 0
+  then k 0
+  else
+    let a = some_list_of_size n  in
+    let k' = f a in
+    loop' (fun r -> k (k' n r)) (n - 1)
+
+let loop = loop' (fun r -> r)
+    #+END_SRC
+
+    Quelle est la complexité en espace de ~loop' n~ ? A priori, linéaire : dans
+    le corps de ~loop'~ on fabrique une chaîne de ~n~ fermetures. Mais ici, les
+    listes ~a~ de taille ~n~ ne peuvent pas être libérées avant que ~loop'~
+    termine, puisqu'elles sont atteignables depuis les fermetures pour ~h~. La
+    complexité en espace est donc quadratique !
+
+    Shao et Appel ont proposé une solution à ce problème. Elle consiste à
+    introduire des environnements partagés de taille minimale pour factoriser
+    uniquement les variables qui sont *vraiment* partagées entre fermetures.
+    Lire leur article (URL ci-dessous) si la question vous intéresse.
+
+    https://flint.cs.yale.edu/flint/publications/escc.pdf
+
+    (Le compilateur OCaml utilise des fermetures à plat.)
+*** Gestion de l'application partielle
+    Comment va être traduit le code suivant ?
+
+    #+BEGIN_SRC ocaml
+let f x y z =
+  x + y + z
+
+let g =
+  fun x ->
+  print_string "hello";
+  fun y ->
+  print_string " world!\n";
+  fun z ->
+  x + y + z
+
+let h =
+  let r = ref 0 in
+  fun x y z ->
+    let n = !r + y + z in
+    r := x;
+    n
+
+let test () =
+  print_int (f 1 2 3);
+  print_int (g 1 2 3);
+  print_int (h 1 2 3)
+    #+END_SRC
+
+    Si on traduit tous les appels et fonctions anonymes uniformément, on va
+    faire payer le même coût aux trois appels. En particulier, il va falloir
+    allouer trois fermetures intermédiaires pour ~f~ et ~h~. Ce n'est pas
+    raisonnable dans un compilateur réaliste ; on voudrait réussir à compiler
+    les appels à ~f~ et ~h~ vers l'instruction ~call~ x86-64, en passant les
+    quatre arguments (1, 2 et 3 plus la fermeture) dans les registres.
+
+    On peut tout d'abord réaliser que ~f~ est une fonction top-level close, sans
+    environnement. On pourrait donc éviter de créer une fermeture et l'appeler
+    directement comme fonction connue. Attention : cette optimisation n'est
+    possible que parce qu'on a accès au corps de ~f~, ce qui nous permet de
+    vérifier que celui-ci est directement de la forme ~fun x y z -> ...~. Cette
+    optimisation n'est pas possible pour ~h~.
+
+    Une autre solution serait d'/inliner/ ~f~ dans son appelant. L'inlining est
+    simplement le fait de remplacer un appel de fonction dont le corps est connu
+    par le corps lui-même. Cela a l'avantage d'éviter un appel intermédiaire, et
+    surtout d'exposer plus de code aux optimiseurs du compilateur.
+
+    Pour optimiser ~h~, une solution employée par exemple dans le compilateur
+    OCaml est d'augmenter chaque fermeture avec l'arité de la fonction, et de
+    considérer une construction d'application n-aire (représentée dans l'AST par
+    un constructeur comme ~Eapply of exp * exp list~). Lors de l'exécution de
+    l'application N-aire ~e e1 e2 ... eN~, on commence par calculer la fermeture
+    ~c~ associée à l'expression ~e~, et par nommer ~x1 x2 ... N~ les résultats
+    de l'évaluation de ~e1 e2 ... eN~. Ensuite, on regarde le champ ~c.arity~ :
+
+    - si ~N = c.arity~ : on peut faire un appel à ~c.fun~ en passant tous les
+      arguments, sans créer de fermeture intermédiaire;
+
+    - si ~N < c.arity~ : on doit créer une fermeture qui attend ~c.arity - N~
+      arguments ~y1~, ... ~yM~, etc. et dont le corps appelle ~c.fun(c, v1, ...,
+      vN, y1, y2, ..., yM)~;
+
+    - si ~N > c.arity~ (on parle parfois de /surapplication/) : faire les
+      applications successives en créant les fermetures intermédiaires.
+
+    Un point important : on peut distinguer statiquement les applications
+    partielles, à partir de l'information de typage. C'est à dire qu'on sait
+    toujours si on est dans un cas ou ~N <= c.arity~ (application partielle
+    potentielle) ou ~N >= c.arity~ (surapplication potentielle). On a donc
+    besoin d'un seul test et pas deux.
