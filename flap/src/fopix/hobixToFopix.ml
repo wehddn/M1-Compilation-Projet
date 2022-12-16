@@ -132,9 +132,12 @@ let free_variables =
     | S.Variable x ->
        M.singleton x
     | S.While (cond, e) ->
-       failwith "Students! This is your job!"
+      unions fvs [cond; e]
     | S.Define (vd, a) ->
-       failwith "Students! This is your job!"
+      begin match vd with
+        | S.SimpleValue (id,e) -> M.diff (fvs e) (M.of_list [id])
+        | S.RecFunctions _ -> failwith "RecFunctions"
+      end
     | S.ReadBlock (a, b) ->
        unions fvs [a; b]
     | S.Apply (a, b) ->
@@ -144,7 +147,7 @@ let free_variables =
     | S.AllocateBlock a ->
        fvs a
     | S.Fun (xs, e) ->
-       failwith "Students! This is your job!"
+       M.diff (fvs e) (M.of_list xs)
     | S.Switch (a, b, c) ->
        let c = match c with None -> [] | Some c -> [c] in
        unions fvs (a :: ExtStd.Array.present_to_list b @ c)
@@ -154,7 +157,7 @@ let free_variables =
 (**
 
     A closure compilation environment relates an identifier to the way
-    it is accessed in the compiled version of the function's
+    it is accessed in the compiled version of  the function's
     body.
 
     Indeed, consider the following example. Imagine that the following
@@ -218,7 +221,7 @@ let translate (p : S.t) env =
        fs @ List.map (fun (x, e) -> T.DefineValue (x, e)) defs
 
   and define_recursive_functions rdefs =
-       failwith "Students! This is your job!"
+       failwith "Students! This is your job! recursive_functions"
   and expression env = function
     | S.Literal l ->
       [], T.Literal (literal l)
@@ -234,9 +237,13 @@ let translate (p : S.t) env =
       in
       ([], xc)
     | S.Define (vdef, a) ->
-         failwith "Students! This is your job!"
+      let vfs = value_definition env vdef in
+      let afs, a = expression env a in
+        failwith "Students! This is your job! expr Define"
     | S.Apply (a, bs) ->
-         failwith "Students! This is your job!"
+      let afs, a = expression env a in
+      let bfs, bs = expressions env bs in
+      (afs @ bfs, T.UnknownFunCall (a, bs))
     | S.IfThenElse (a, b, c) ->
       let afs, a = expression env a in
       let bfs, b = expression env b in
@@ -244,7 +251,7 @@ let translate (p : S.t) env =
       afs @ bfs @ cfs, T.IfThenElse (a, b, c)
 
     | S.Fun (x, e) ->
-         failwith "Students! This is your job!"
+         failwith "Students! This is your job! expr Fun"
     | S.AllocateBlock a ->
       let afs, a = expression env a in
       (afs, allocate_block a)
