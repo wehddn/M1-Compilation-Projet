@@ -237,13 +237,27 @@ let translate (p : S.t) env =
       in
       ([], xc)
     | S.Define (vdef, a) ->
-      let vfs = value_definition env vdef in
-      let afs, a = expression env a in
-        failwith "Students! This is your job! expr Define"
+      begin match vdef with
+      | S.SimpleValue (x, e) -> 
+        let afs, a = expression env a in
+        let bfs, e = expression env e in
+        (bfs @ afs, T.Define(identifier x,e,a))
+      | _ -> assert false
+      end
     | S.Apply (a, bs) ->
-      let afs, a = expression env a in
-      let bfs, bs = expressions env bs in
-      (afs @ bfs, T.UnknownFunCall (a, bs))
+      let afs, a_expr = expression env a in
+      let bfs, bs_exprs = expressions env bs in
+      let fun_id_str = (
+        match a_expr with
+        | Variable (T.Id s) -> s
+        | _ -> assert false
+      ) in
+      let test = Char.code (fun_id_str.[0]) in
+      afs @ bfs,
+      if not(91<= test && test <= 122) || fun_id_str = "print_int" || fun_id_str = "print_string" then
+        T.FunCall(T.FunId fun_id_str,bs_exprs)
+      else
+        T.UnknownFunCall( read_block a_expr (lint 0),bs_exprs)
     | S.IfThenElse (a, b, c) ->
       let afs, a = expression env a in
       let bfs, b = expression env b in
@@ -251,7 +265,33 @@ let translate (p : S.t) env =
       afs @ bfs @ cfs, T.IfThenElse (a, b, c)
 
     | S.Fun (x, e) ->
-         failwith "Students! This is your job! expr Fun"
+        let fv = List.map identifier ( free_variables (S.Fun (x, e ))) in
+        let fun_name_id = make_fresh_function_identifier () in
+        let fun_name_str = (match fun_name_id with | FunId(s) -> s) in
+        
+        let closure_id = T.Id(fun_name_str ^"_clo") in
+        let closure = T.Variable(closure_id) in
+        
+        let rec make_closure fv i = 
+        (
+          match fv with
+          | [] -> closure
+          | T.Id v::r ->
+            let writeblock =
+              if i== 0 then
+                write_block closure(lint i) (Literal (LFun(FunId v)))
+              else
+                write_block closure (lint i) (Variable (T.Id v)) in
+                T.Define( T.Id "__nothing__", writeblock,make_closure r (i+1)
+                 )
+         ) in
+         let closure = make_closure(T.Id (fun_name_str) :: fv) 0 in
+         let closure = T.Define(closure_id, allocate_block(lint(List.length fv +1)), closure) in
+          [
+            DefineFunction(fun_name_id,
+                          List.map identifier x,
+                          snd(expression env e));               
+          ], closure
     | S.AllocateBlock a ->
       let afs, a = expression env a in
       (afs, allocate_block a)
