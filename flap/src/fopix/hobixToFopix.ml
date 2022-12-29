@@ -237,20 +237,21 @@ let translate (p : S.t) env =
       in
       ([], xc)
     | S.Define (vdef, a) ->
+      let vd = value_definition env vdef in
       begin match vdef with
       | S.SimpleValue (x, e) -> 
         let afs, a = expression env a in
         let bfs, e = expression env e in
         (bfs @ afs, T.Define(identifier x,e,a))
-      | _ -> assert false
+      | S.RecFunctions _ -> failwith "S.Define - RecFunctions"
       end
     | S.Apply (a, bs) ->
       let afs, a_expr = expression env a in
       let bfs, bs_exprs = expressions env bs in
       let fun_id_str = (
         match a_expr with
-        | Variable (T.Id s) -> s
-        | _ -> assert false
+        | T.Variable (T.Id s) -> s
+        | _ -> failwith "S.Apply"
       ) in
       let test = Char.code (fun_id_str.[0]) in
       afs @ bfs,
